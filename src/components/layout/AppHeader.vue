@@ -1,0 +1,173 @@
+<template>
+  <nav class="navbar navbar-expand-lg fixed-top app-nav">
+    <div class="container-fluid px-3 px-lg-4">
+      <div class="app-nav__shell w-100">
+        <router-link class="navbar-brand app-brand" to="/">
+          <span class="app-brand__crest">
+            <i class="bi bi-buildings"></i>
+          </span>
+          <span>
+            <span class="app-brand__eyebrow">The Residenz Collection</span>
+            <span class="app-brand__name">Guest Atelier</span>
+          </span>
+        </router-link>
+
+        <button
+          class="navbar-toggler app-nav__toggle"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <i class="bi bi-list"></i>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+            <li class="nav-item" v-for="item in navItems" :key="item.to">
+              <router-link class="nav-link app-link" :to="item.to">
+                <i :class="item.icon"></i>
+                <span>{{ item.label }}</span>
+              </router-link>
+            </li>
+            <li class="nav-item ms-lg-2 mt-3 mt-lg-0">
+              <div class="app-presence">
+                <span class="timeline-dot"></span>
+                <span>Front Desk Online</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </nav>
+</template>
+
+<script setup>
+const navItems = [
+  { to: "/", label: "Dashboard", icon: "bi bi-grid-1x2-fill" },
+  { to: "/register", label: "Register", icon: "bi bi-person-plus-fill" },
+  { to: "/guests", label: "Guests", icon: "bi bi-people-fill" },
+];
+</script>
+
+<style scoped>
+.app-nav {
+  padding: 1rem var(--page-padding) 0;
+}
+
+.app-nav__shell {
+  align-items: center;
+  background: rgba(7, 18, 36, 0.78);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  box-shadow: 0 18px 40px rgba(2, 9, 20, 0.28);
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  padding: 0.9rem 1rem;
+}
+
+.app-brand {
+  align-items: center;
+  color: var(--luxury-white);
+  display: inline-flex;
+  gap: 0.9rem;
+  min-width: 0;
+}
+
+.app-brand__crest {
+  align-items: center;
+  background: linear-gradient(135deg, rgba(104, 167, 255, 0.18), rgba(217, 72, 98, 0.18));
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 18px;
+  color: var(--luxury-white);
+  display: inline-flex;
+  font-size: 1.2rem;
+  height: 48px;
+  justify-content: center;
+  width: 48px;
+}
+
+.app-brand__eyebrow,
+.app-brand__name {
+  display: block;
+}
+
+.app-brand__eyebrow {
+  color: rgba(246, 247, 251, 0.54);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.app-brand__name {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.app-nav__toggle {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: none;
+  color: var(--luxury-white);
+}
+
+.app-link {
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: rgba(246, 247, 251, 0.72) !important;
+  display: inline-flex;
+  font-size: 0.92rem;
+  font-weight: 700;
+  gap: 0.55rem;
+  letter-spacing: 0.04em;
+  padding: 0.75rem 1rem !important;
+  transition:
+    color 180ms ease,
+    background 180ms ease,
+    border-color 180ms ease,
+    transform 180ms ease;
+}
+
+.app-link:hover,
+.app-link.router-link-exact-active {
+  background: linear-gradient(135deg, rgba(104, 167, 255, 0.12), rgba(217, 72, 98, 0.12));
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--luxury-white) !important;
+  transform: translateY(-1px);
+}
+
+.app-presence {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  color: rgba(246, 247, 251, 0.8);
+  display: inline-flex;
+  gap: 0.55rem;
+  padding: 0.75rem 1rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 991.98px) {
+  .app-nav {
+    padding-inline: 1rem;
+  }
+
+  .app-nav__shell {
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+
+  .app-presence {
+    justify-content: center;
+    width: 100%;
+  }
+}
+</style>
