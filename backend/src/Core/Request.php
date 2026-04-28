@@ -67,6 +67,10 @@ class Request
 
     public function body(): array
     {
+        if ($this->isMultipart()) {
+            return $_POST;
+        }
+
         if ($this->jsonBody !== null) {
             return $this->jsonBody;
         }
@@ -89,6 +93,18 @@ class Request
         return $this->body()[$key] ?? $default;
     }
 
+    public function file(string $key): ?array
+    {
+        $file = $_FILES[$key] ?? null;
+
+        return is_array($file) ? $file : null;
+    }
+
+    public function files(): array
+    {
+        return $_FILES;
+    }
+
     public function setAttribute(string $key, mixed $value): void
     {
         $this->attributes[$key] = $value;
@@ -97,5 +113,12 @@ class Request
     public function attribute(string $key, mixed $default = null): mixed
     {
         return $this->attributes[$key] ?? $default;
+    }
+
+    private function isMultipart(): bool
+    {
+        $contentType = (string) $this->header('Content-Type', '');
+
+        return str_starts_with(strtolower($contentType), 'multipart/form-data');
     }
 }

@@ -5,10 +5,14 @@ namespace App\Controllers;
 use App\Core\ApiException;
 use App\Core\Request;
 use App\Repositories\GuestRepository;
+use App\Services\GuestImportService;
 
 class GuestController
 {
-    public function __construct(private readonly GuestRepository $guests)
+    public function __construct(
+        private readonly GuestRepository $guests,
+        private readonly GuestImportService $guestImportService
+    )
     {
     }
 
@@ -67,6 +71,25 @@ class GuestController
         ];
     }
 
+    public function import(Request $request): array
+    {
+        $file = $request->file('file');
+
+        if ($file === null) {
+            throw new ApiException('Please upload your Excel file using the "file" field.', 422);
+        }
+
+        $rows = $this->guestImportService->parseUploadedFile($file);
+        $imported = $this->guests->import($rows);
+
+        return [
+            'message' => 'Guest import completed successfully.',
+            'data' => [
+                'importedCount' => $imported,
+            ],
+        ];
+    }
+
     public function destroy(Request $request): array
     {
         $id = (int) $request->attribute('id');
@@ -84,6 +107,9 @@ class GuestController
     {
         $data = [
             'fullName' => trim((string) ($payload['fullName'] ?? '')),
+            'company' => trim((string) ($payload['company'] ?? '')),
+            'position' => trim((string) ($payload['position'] ?? '')),
+            'seatNumber' => trim((string) ($payload['seatNumber'] ?? '')),
             'email' => trim((string) ($payload['email'] ?? '')),
             'phone' => trim((string) ($payload['phone'] ?? '')),
             'suite' => trim((string) ($payload['suite'] ?? '')),

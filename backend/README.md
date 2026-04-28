@@ -6,6 +6,7 @@ Minimal PHP 8 + MySQL API for the Vue frontend.
 
 - Token-based authentication middleware for protected routes
 - Guest CRUD endpoints matching the current frontend fields
+- Excel guest import endpoint for `.xlsx` and `.csv` files
 - MySQL schema with a seeded admin user and guest records
 - Lightweight custom router/container with no Composer dependency
 
@@ -40,5 +41,19 @@ npm run dev
 - `GET /api/guests`
 - `GET /api/guests/{id}`
 - `POST /api/guests`
+- `POST /api/guests/import`
 - `PUT /api/guests/{id}`
 - `DELETE /api/guests/{id}`
+
+## Excel Import
+
+Send a `multipart/form-data` request to `POST /api/guests/import` with a `file` field.
+
+Required spreadsheet columns:
+
+- `full_name`
+- `company`
+- `position`
+- `seat_number`
+
+Imported rows are saved into `guests`, and the backend auto-fills the existing required fields (`email`, `suite`, `check_in`, `check_out`, `status`) with import-safe defaults.

@@ -22,6 +22,9 @@ CREATE TABLE IF NOT EXISTS api_tokens (
 CREATE TABLE IF NOT EXISTS guests (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     full_name VARCHAR(150) NOT NULL,
+    company VARCHAR(150) NULL,
+    position VARCHAR(150) NULL,
+    seat_number VARCHAR(50) NULL,
     email VARCHAR(190) NOT NULL,
     phone VARCHAR(40) NULL,
     suite VARCHAR(100) NOT NULL,
@@ -34,20 +37,24 @@ CREATE TABLE IF NOT EXISTS guests (
     updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+ALTER TABLE guests ADD COLUMN IF NOT EXISTS company VARCHAR(150) NULL AFTER full_name;
+ALTER TABLE guests ADD COLUMN IF NOT EXISTS position VARCHAR(150) NULL AFTER company;
+ALTER TABLE guests ADD COLUMN IF NOT EXISTS seat_number VARCHAR(50) NULL AFTER position;
+
 INSERT INTO users (name, email, password_hash)
 SELECT 'Front Desk Admin', 'admin@luxuryhotel.test', '$2y$12$D002k3/UfVMYxorR896X8erG89F9GtQeLjDnFdc8wAQ79TYa68qA.'
 WHERE NOT EXISTS (
     SELECT 1 FROM users WHERE email = 'admin@luxuryhotel.test'
 );
 
-INSERT INTO guests (full_name, email, phone, suite, check_in, check_out, status, special_requests, vip_status)
-SELECT 'Isabella Rossi', 'isabella.rossi@email.com', '+39 123 456 7890', 'Imperial Suite', '2026-04-30', '2026-05-05', 'active', 'Champagne upon arrival, Extra pillows', 1
+INSERT INTO guests (full_name, company, position, seat_number, email, phone, suite, check_in, check_out, status, special_requests, vip_status)
+SELECT 'Isabella Rossi', 'Rossi Holdings', 'Chairwoman', 'A01', 'isabella.rossi@email.com', '+39 123 456 7890', 'Imperial Suite', '2026-04-30', '2026-05-05', 'active', 'Champagne upon arrival, Extra pillows', 1
 WHERE NOT EXISTS (SELECT 1 FROM guests WHERE email = 'isabella.rossi@email.com');
 
-INSERT INTO guests (full_name, email, phone, suite, check_in, check_out, status, special_requests, vip_status)
-SELECT 'Alexander Chen', 'alex.chen@email.com', '+86 987 654 3210', 'Royal Penthouse', '2026-05-01', '2026-05-07', 'pending', 'Vegan meal plan, Airport transfer', 1
+INSERT INTO guests (full_name, company, position, seat_number, email, phone, suite, check_in, check_out, status, special_requests, vip_status)
+SELECT 'Alexander Chen', 'Chen Ventures', 'Managing Director', 'B14', 'alex.chen@email.com', '+86 987 654 3210', 'Royal Penthouse', '2026-05-01', '2026-05-07', 'pending', 'Vegan meal plan, Airport transfer', 1
 WHERE NOT EXISTS (SELECT 1 FROM guests WHERE email = 'alex.chen@email.com');
 
-INSERT INTO guests (full_name, email, phone, suite, check_in, check_out, status, special_requests, vip_status)
-SELECT 'Victoria Sterling', 'vicky.sterling@email.com', '+44 20 1234 5678', 'Diamond Suite', '2026-05-03', '2026-05-06', 'active', 'Spa appointments daily', 0
+INSERT INTO guests (full_name, company, position, seat_number, email, phone, suite, check_in, check_out, status, special_requests, vip_status)
+SELECT 'Victoria Sterling', 'Sterling & Co.', 'Brand Director', 'C07', 'vicky.sterling@email.com', '+44 20 1234 5678', 'Diamond Suite', '2026-05-03', '2026-05-06', 'active', 'Spa appointments daily', 0
 WHERE NOT EXISTS (SELECT 1 FROM guests WHERE email = 'vicky.sterling@email.com');

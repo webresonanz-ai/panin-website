@@ -12,5 +12,6 @@ $router->post('/api/auth/logout', [AuthController::class, 'logout'], [AuthMiddle
 $router->get('/api/guests', [GuestController::class, 'index']);
 $router->get('/api/guests/{id}', [GuestController::class, 'show']);
 $router->post('/api/guests', [GuestController::class, 'store'], [AuthMiddleware::class]);
+$router->post('/api/guests/import', [GuestController::class, 'import'], [AuthMiddleware::class]);
 $router->put('/api/guests/{id}', [GuestController::class, 'update'], [AuthMiddleware::class]);
 $router->delete('/api/guests/{id}', [GuestController::class, 'destroy'], [AuthMiddleware::class]);
