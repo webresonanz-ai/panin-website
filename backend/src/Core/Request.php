@@ -1,0 +1,101 @@
+<?php
+
+namespace App\Core;
+
+class Request
+{
+    private array $attributes = [];
+    private ?array $jsonBody = null;
+
+    public function __construct(
+        private readonly string $method,
+        private readonly string $path,
+        private readonly array $query = [],
+        private readonly array $headers = [],
+        private readonly string $rawBody = ''
+    ) {
+    }
+
+    public static function capture(): self
+    {
+        $uri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+
+        return new self(
+            strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET'),
+            rtrim($uri, '/') ?: '/',
+            $_GET,
+            function_exists('getallheaders') ? getallheaders() : [],
+            file_get_contents('php://input') ?: ''
+        );
+    }
+
+    public function method(): string
+    {
+        return $this->method;
+    }
+
+    public function path(): string
+    {
+        return $this->path;
+    }
+
+    public function query(?string $key = null, mixed $default = null): mixed
+    {
+        if ($key === null) {
+            return $this->query;
+        }
+
+        return $this->query[$key] ?? $default;
+    }
+
+    public function header(string $key, mixed $default = null): mixed
+    {
+        $headers = array_change_key_case($this->headers, CASE_LOWER);
+        return $headers[strtolower($key)] ?? $default;
+    }
+
+    public function bearerToken(): ?string
+    {
+        $header = $this->header('Authorization');
+
+        if (!$header || !str_starts_with($header, 'Bearer ')) {
+            return null;
+        }
+
+        return trim(substr($header, 7));
+    }
+
+    public function body(): array
+    {
+        if ($this->jsonBody !== null) {
+            return $this->jsonBody;
+        }
+
+        if ($this->rawBody === '') {
+            return $this->jsonBody = [];
+        }
+
+        $decoded = json_decode($this->rawBody, true);
+
+        if (!is_array($decoded)) {
+            throw new ApiException('Invalid JSON payload.', 422);
+        }
+
+        return $this->jsonBody = $decoded;
+    }
+
+    public function input(string $key, mixed $default = null): mixed
+    {
+        return $this->body()[$key] ?? $default;
+    }
+
+    public function setAttribute(string $key, mixed $value): void
+    {
+        $this->attributes[$key] = $value;
+    }
+
+    public function attribute(string $key, mixed $default = null): mixed
+    {
+        return $this->attributes[$key] ?? $default;
+    }
+}

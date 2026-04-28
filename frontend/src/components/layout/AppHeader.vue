@@ -32,11 +32,23 @@
                 <span>{{ item.label }}</span>
               </router-link>
             </li>
-            <li class="nav-item ms-lg-2 mt-3 mt-lg-0">
+            <li v-if="authStore.isAuthenticated" class="nav-item ms-lg-2">
               <div class="app-presence">
                 <span class="timeline-dot"></span>
-                <span>Front Desk Online</span>
+                <span>{{ authStore.user?.name || "Front Desk Online" }}</span>
               </div>
+            </li>
+            <li v-if="authStore.isAuthenticated" class="nav-item ms-lg-2 mt-3 mt-lg-0">
+              <button type="button" class="btn luxury-btn-ghost app-logout" @click="handleLogout">
+                <i class="bi bi-box-arrow-right"></i>
+                Sign Out
+              </button>
+            </li>
+            <li v-else class="nav-item ms-lg-2 mt-3 mt-lg-0">
+              <router-link class="btn luxury-btn" :to="{ name: 'login', query: { redirect: '/register' } }">
+              <i class="bi bi-shield-lock"></i>
+              Staff Login
+              </router-link>
             </li>
           </ul>
         </div>
@@ -46,11 +58,22 @@
 </template>
 
 <script setup>
+import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/authStore";
+
+const router = useRouter();
+const authStore = useAuthStore();
+
 const navItems = [
   { to: "/", label: "Dashboard", icon: "bi bi-grid-1x2-fill" },
-  { to: "/register", label: "Register", icon: "bi bi-person-plus-fill" },
   { to: "/guests", label: "Guests", icon: "bi bi-people-fill" },
+  { to: "/register", label: "Register", icon: "bi bi-person-plus-fill" },
 ];
+
+const handleLogout = async () => {
+  await authStore.logout();
+  router.push({ name: "login" });
+};
 </script>
 
 <style scoped>
@@ -152,6 +175,10 @@ const navItems = [
   display: inline-flex;
   gap: 0.55rem;
   padding: 0.75rem 1rem;
+  white-space: nowrap;
+}
+
+.app-logout {
   white-space: nowrap;
 }
 

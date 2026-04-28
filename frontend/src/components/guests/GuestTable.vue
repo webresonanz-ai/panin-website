@@ -79,7 +79,7 @@
                 <router-link :to="`/guest/${guest.id}`" class="action-icon action-accent" aria-label="View guest details">
                   <i class="bi bi-eye"></i>
                 </router-link>
-                <button type="button" class="action-icon" aria-label="Edit guest" @click="$emit('edit', guest)">
+                <button type="button" class="action-icon" aria-label="Edit guest" @click="handleEdit(guest)">
                   <i class="bi bi-pencil"></i>
                 </button>
                 <button type="button" class="action-icon action-danger" aria-label="Delete guest" @click="confirmDelete(guest)">
@@ -103,11 +103,15 @@
 </template>
 
 <script setup>
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
+import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/authStore";
 import { useGuestStore } from "@/stores/guestStore";
 
 const emit = defineEmits(["edit", "delete"]);
 
+const router = useRouter();
+const authStore = useAuthStore();
 const guestStore = useGuestStore();
 const searchQuery = ref("");
 const statusFilter = ref("all");
@@ -138,6 +142,13 @@ const filteredGuests = computed(() => {
   });
 });
 
+watch([searchQuery, statusFilter], () => {
+  guestStore.fetchGuests({
+    search: searchQuery.value,
+    status: statusFilter.value,
+  }).catch(() => {});
+});
+
 const formatDate = (date) =>
   new Date(date).toLocaleDateString("en-US", {
     month: "short",
@@ -148,7 +159,25 @@ const formatDate = (date) =>
 const statusClass = (status) =>
   status === "active" ? "status-pill status-pill-active" : "status-pill status-pill-pending";
 
+const requireLogin = () => {
+  router.push({ name: "login", query: { redirect: "/register" } });
+};
+
+const handleEdit = (guest) => {
+  if (!authStore.isAuthenticated) {
+    requireLogin();
+    return;
+  }
+
+  emit("edit", guest);
+};
+
 const confirmDelete = (guest) => {
+  if (!authStore.isAuthenticated) {
+    requireLogin();
+    return;
+  }
+
   if (confirm(`Are you sure you want to remove ${guest.fullName}?`)) {
     emit("delete", guest.id);
   }

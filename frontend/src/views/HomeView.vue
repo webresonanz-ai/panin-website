@@ -118,7 +118,7 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useGuestStore } from "@/stores/guestStore";
 import GuestStats from "@/components/guests/GuestStats.vue";
@@ -127,14 +127,18 @@ import GuestTable from "@/components/guests/GuestTable.vue";
 const router = useRouter();
 const guestStore = useGuestStore();
 
+onMounted(() => {
+  guestStore.ensureLoaded();
+});
+
 const recentCheckIns = computed(() => guestStore.allGuests.slice(0, 3));
 
 const handleEdit = (guest) => {
   router.push({ name: "register", query: { edit: guest.id } });
 };
 
-const handleDelete = (id) => {
-  guestStore.deleteGuest(id);
+const handleDelete = async (id) => {
+  await guestStore.deleteGuest(id);
 };
 
 const statusClass = (status) =>

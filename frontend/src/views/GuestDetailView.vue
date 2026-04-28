@@ -14,11 +14,23 @@
               <i class="bi bi-arrow-left"></i>
               Back
             </button>
-            <router-link :to="{ name: 'register', query: { edit: guest.id } }" class="btn luxury-btn">
+            <router-link
+              v-if="authStore.isAuthenticated"
+              :to="{ name: 'register', query: { edit: guest.id } }"
+              class="btn luxury-btn"
+            >
               <i class="bi bi-pencil-square"></i>
               Edit
             </router-link>
-            <button @click="handleDelete" class="btn luxury-btn luxury-btn-secondary">
+            <router-link
+              v-else
+              :to="{ name: 'login', query: { redirect: `/register?edit=${guest.id}` } }"
+              class="btn luxury-btn"
+            >
+              <i class="bi bi-shield-lock"></i>
+              Login to Edit
+            </router-link>
+            <button v-if="authStore.isAuthenticated" @click="handleDelete" class="btn luxury-btn luxury-btn-secondary">
               <i class="bi bi-trash3"></i>
               Delete
             </button>
@@ -141,15 +153,23 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/authStore";
 import { useGuestStore } from "@/stores/guestStore";
 
 const route = useRoute();
 const router = useRouter();
+const authStore = useAuthStore();
 const guestStore = useGuestStore();
+const remoteGuest = ref(null);
 
-const guest = computed(() => guestStore.getGuestById(Number(route.params.id)));
+onMounted(async () => {
+  await guestStore.ensureLoaded();
+  remoteGuest.value = await guestStore.fetchGuest(Number(route.params.id)).catch(() => null);
+});
+
+const guest = computed(() => remoteGuest.value || guestStore.getGuestById(Number(route.params.id)));
 
 const formatDate = (date) =>
   new Date(date).toLocaleDateString("en-US", {
@@ -164,8 +184,9 @@ const statusClass = (status) =>
 
 const handleDelete = () => {
   if (guest.value && confirm(`Are you sure you want to delete ${guest.value.fullName}?`)) {
-    guestStore.deleteGuest(guest.value.id);
-    router.push("/guests");
+    guestStore.deleteGuest(guest.value.id).then(() => {
+      router.push("/guests");
+    });
   }
 };
 </script>

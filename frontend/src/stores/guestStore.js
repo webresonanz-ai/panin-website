@@ -1,109 +1,125 @@
 import { defineStore } from "pinia";
-import { ref, computed } from "vue";
+import { computed, ref } from "vue";
+import { api } from "@/lib/api";
 
 export const useGuestStore = defineStore("guests", () => {
-  // State
-  const guests = ref([
-    {
-      id: 1,
-      fullName: "Isabella Rossi",
-      email: "isabella.rossi@email.com",
-      phone: "+39 123 456 7890",
-      suite: "Imperial Suite",
-      checkIn: "2024-01-15",
-      checkOut: "2024-01-20",
-      status: "active",
-      specialRequests: "Champagne upon arrival, Extra pillows",
-      vipStatus: true,
-    },
-    {
-      id: 2,
-      fullName: "Alexander Chen",
-      email: "alex.chen@email.com",
-      phone: "+86 987 654 3210",
-      suite: "Royal Penthouse",
-      checkIn: "2024-01-16",
-      checkOut: "2024-01-22",
-      status: "pending",
-      specialRequests: "Vegan meal plan, Airport transfer",
-      vipStatus: true,
-    },
-    {
-      id: 3,
-      fullName: "Victoria Sterling",
-      email: "vicky.sterling@email.com",
-      phone: "+44 20 1234 5678",
-      suite: "Diamond Suite",
-      checkIn: "2024-01-17",
-      checkOut: "2024-01-19",
-      status: "active",
-      specialRequests: "Spa appointments daily",
-      vipStatus: false,
-    },
-  ]);
+  const guests = ref([]);
+  const stats = ref({
+    totalGuests: 0,
+    activeGuests: 0,
+    pendingGuests: 0,
+    vipGuests: 0,
+  });
+  const loading = ref(false);
+  const loaded = ref(false);
+  const error = ref("");
 
-  const nextId = ref(4);
-
-  // Getters
   const allGuests = computed(() => guests.value);
-
-  const activeGuests = computed(() => guests.value.filter((g) => g.status === "active"));
-
-  const pendingGuests = computed(() => guests.value.filter((g) => g.status === "pending"));
-
-  const vipGuests = computed(() => guests.value.filter((g) => g.vipStatus));
-
+  const activeGuests = computed(() => guests.value.filter((guest) => guest.status === "active"));
+  const pendingGuests = computed(() => guests.value.filter((guest) => guest.status === "pending"));
+  const vipGuests = computed(() => guests.value.filter((guest) => guest.vipStatus));
   const totalGuests = computed(() => guests.value.length);
 
   const getGuestById = computed(() => {
-    return (id) => guests.value.find((g) => g.id === id) || null;
+    return (id) => guests.value.find((guest) => guest.id === id) || null;
   });
 
-  // Actions
-  function addGuest(guestData) {
-    const newGuest = {
-      id: nextId.value++,
-      ...guestData,
-      status: "active",
-      createdAt: new Date().toISOString(),
+  function setGuestCollection(payload) {
+    guests.value = payload.guests || [];
+    stats.value = payload.stats || {
+      totalGuests: guests.value.length,
+      activeGuests: activeGuests.value.length,
+      pendingGuests: pendingGuests.value.length,
+      vipGuests: vipGuests.value.length,
     };
-    guests.value.push(newGuest);
-    return newGuest;
+    loaded.value = true;
   }
 
-  function updateGuest(id, updatedData) {
-    const index = guests.value.findIndex((g) => g.id === id);
-    if (index !== -1) {
-      guests.value[index] = { ...guests.value[index], ...updatedData };
-      return true;
+  async function fetchGuests(filters = {}) {
+    loading.value = true;
+    error.value = "";
+
+    try {
+      const params = new URLSearchParams();
+
+      if (filters.search) {
+        params.set("search", filters.search);
+      }
+
+      if (filters.status && filters.status !== "all") {
+        params.set("status", filters.status);
+      }
+
+      const query = params.toString() ? `?${params.toString()}` : "";
+      const response = await api.get(`/api/guests${query}`);
+      setGuestCollection(response.data);
+      return guests.value;
+    } catch (requestError) {
+      error.value = requestError.message || "Unable to load guests.";
+      throw requestError;
+    } finally {
+      loading.value = false;
     }
-    return false;
   }
 
-  function deleteGuest(id) {
-    const index = guests.value.findIndex((g) => g.id === id);
-    if (index !== -1) {
-      guests.value.splice(index, 1);
-      return true;
+  async function ensureLoaded() {
+    if (!loaded.value) {
+      await fetchGuests();
     }
-    return false;
   }
 
-  function updateGuestStatus(id, status) {
-    return updateGuest(id, { status });
+  async function addGuest(guestData) {
+    const response = await api.post("/api/guests", guestData);
+    await fetchGuests();
+    return response.data.guest;
+  }
+
+  async function updateGuest(id, updatedData) {
+    const response = await api.put(`/api/guests/${id}`, updatedData);
+    await fetchGuests();
+    return response.data.guest;
+  }
+
+  async function deleteGuest(id) {
+    await api.delete(`/api/guests/${id}`);
+    await fetchGuests();
+  }
+
+  async function fetchGuest(id) {
+    const response = await api.get(`/api/guests/${id}`);
+    return response.data.guest;
+  }
+
+  function reset() {
+    guests.value = [];
+    error.value = "";
+    loaded.value = false;
+    stats.value = {
+      totalGuests: 0,
+      activeGuests: 0,
+      pendingGuests: 0,
+      vipGuests: 0,
+    };
   }
 
   return {
     guests,
+    stats,
+    loading,
+    loaded,
+    error,
     allGuests,
     activeGuests,
     pendingGuests,
     vipGuests,
     totalGuests,
     getGuestById,
+    fetchGuests,
+    fetchGuest,
+    ensureLoaded,
     addGuest,
     updateGuest,
     deleteGuest,
-    updateGuestStatus,
+    reset,
   };
 });

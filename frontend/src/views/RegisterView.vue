@@ -69,7 +69,8 @@ const guestStore = useGuestStore();
 const isEditing = ref(false);
 const guestToEdit = ref(null);
 
-onMounted(() => {
+onMounted(async () => {
+  await guestStore.ensureLoaded();
   const editId = route.query.edit;
   if (editId) {
     const guest = guestStore.getGuestById(Number(editId));
@@ -80,11 +81,11 @@ onMounted(() => {
   }
 });
 
-const handleSubmit = (formData) => {
+const handleSubmit = async (formData) => {
   if (isEditing.value && guestToEdit.value) {
-    guestStore.updateGuest(guestToEdit.value.id, formData);
+    await guestStore.updateGuest(guestToEdit.value.id, formData);
   } else {
-    guestStore.addGuest(formData);
+    await guestStore.addGuest(formData);
   }
 
   router.push({ name: "guests" });
