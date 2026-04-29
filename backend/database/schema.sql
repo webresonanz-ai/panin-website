@@ -31,6 +31,8 @@ CREATE TABLE IF NOT EXISTS guests (
     status ENUM('active', 'pending') NOT NULL DEFAULT 'active',
     special_requests TEXT NULL,
     vip_status TINYINT(1) NOT NULL DEFAULT 0,
+    checked_in_at DATETIME NULL,
+    check_in_method VARCHAR(32) NULL,
     created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -39,6 +41,8 @@ ALTER TABLE guests ADD COLUMN IF NOT EXISTS company VARCHAR(150) NULL AFTER full
 ALTER TABLE guests ADD COLUMN IF NOT EXISTS position VARCHAR(150) NULL AFTER company;
 ALTER TABLE guests ADD COLUMN IF NOT EXISTS seat_number VARCHAR(50) NULL AFTER position;
 ALTER TABLE guests ADD COLUMN IF NOT EXISTS registration_number VARCHAR(64) NULL AFTER full_name;
+ALTER TABLE guests ADD COLUMN IF NOT EXISTS checked_in_at DATETIME NULL AFTER vip_status;
+ALTER TABLE guests ADD COLUMN IF NOT EXISTS check_in_method VARCHAR(32) NULL AFTER checked_in_at;
 
 UPDATE guests
 SET registration_number = CONCAT(

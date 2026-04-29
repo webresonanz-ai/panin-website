@@ -107,6 +107,54 @@ class GuestController
         return ['message' => 'Guest deleted successfully.'];
     }
 
+    public function checkIn(Request $request): array
+    {
+        $payload = $request->body();
+        $code = trim((string) ($payload['qrCode'] ?? $payload['registrationNumber'] ?? ''));
+
+        if ($code === '') {
+            throw new ApiException('QR code payload is required.', 422, [
+                'qrCode' => ['Scan a QR code or enter a registration number.'],
+            ]);
+        }
+
+        $registrationNumber = $this->extractRegistrationNumber($code);
+
+        if ($registrationNumber === null) {
+            throw new ApiException('Unable to read a valid registration number from this QR code.', 422, [
+                'qrCode' => ['The scanned QR code does not match a guest registration code.'],
+            ]);
+        }
+
+        $guest = $this->guests->findByRegistrationNumber($registrationNumber);
+
+        if (!$guest) {
+            throw new ApiException('Guest not found for this registration number.', 404);
+        }
+
+        if ($guest['isCheckedIn']) {
+            return [
+                'message' => 'Guest has already been checked in.',
+                'data' => [
+                    'status' => 'already_checked_in',
+                    'guest' => $guest,
+                    'registrationNumber' => $registrationNumber,
+                ],
+            ];
+        }
+
+        $checkedInGuest = $this->guests->markCheckedIn($guest['id'], 'qr_scan');
+
+        return [
+            'message' => 'Guest checked in successfully.',
+            'data' => [
+                'status' => 'checked_in',
+                'guest' => $checkedInGuest,
+                'registrationNumber' => $registrationNumber,
+            ],
+        ];
+    }
+
     public function invitationTicket(Request $request): ?array
     {
         $guest = $this->guests->find((int) $request->attribute('id'));
@@ -171,6 +219,8 @@ class GuestController
             'activeGuests' => count(array_filter($guests, fn ($guest) => $guest['status'] === 'active')),
             'pendingGuests' => count(array_filter($guests, fn ($guest) => $guest['status'] === 'pending')),
             'vipGuests' => count(array_filter($guests, fn ($guest) => $guest['vipStatus'] === true)),
+            'checkedInGuests' => count(array_filter($guests, fn ($guest) => $guest['isCheckedIn'] === true)),
+            'awaitingCheckInGuests' => count(array_filter($guests, fn ($guest) => $guest['isCheckedIn'] === false)),
         ];
     }
 
@@ -178,5 +228,42 @@ class GuestController
     {
         $value = trim((string) $value);
         return $value === '' ? null : $value;
+    }
+
+    private function extractRegistrationNumber(string $value): ?string
+    {
+        $value = trim($value);
+
+        if ($value === '') {
+            return null;
+        }
+
+        $decoded = json_decode($value, true);
+        if (is_array($decoded)) {
+            foreach (['registrationNumber', 'registration_number', 'code'] as $key) {
+                $candidate = trim((string) ($decoded[$key] ?? ''));
+                if ($candidate !== '') {
+                    return strtoupper($candidate);
+                }
+            }
+        }
+
+        if (filter_var($value, FILTER_VALIDATE_URL)) {
+            $query = [];
+            parse_str((string) parse_url($value, PHP_URL_QUERY), $query);
+
+            foreach (['registrationNumber', 'registration_number', 'code'] as $key) {
+                $candidate = trim((string) ($query[$key] ?? ''));
+                if ($candidate !== '') {
+                    return strtoupper($candidate);
+                }
+            }
+        }
+
+        if (preg_match('/PANIN_[A-Z0-9_]+/i', $value, $matches) === 1) {
+            return strtoupper($matches[0]);
+        }
+
+        return null;
     }
 }

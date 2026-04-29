@@ -92,7 +92,7 @@
                       <div class="fw-bold text-white mt-1">
                         {{ guest.vipStatus ? "Concierge Priority" : "Signature Stay" }}
                       </div>
-                      <div class="text-luxury-soft small">{{ guest.status === "active" ? "Currently in-house" : "Awaiting arrival" }}</div>
+                      <div class="text-luxury-soft small">{{ guest.isCheckedIn ? `Checked in ${formatDateTime(guest.checkedInAt)}` : "Awaiting QR check-in" }}</div>
                     </div>
                   </article>
                 </div>
@@ -122,7 +122,7 @@
                 <div>
                   <div class="fw-bold text-white">Arrival state</div>
                   <div class="text-luxury-faint small">
-                    {{ guest.status === "active" ? "Guest is currently checked in and active." : "Guest is pending and should be reviewed before arrival." }}
+                    {{ guest.isCheckedIn ? "Guest has already been admitted through QR check-in." : "Guest has not been scanned at the arrival desk yet." }}
                   </div>
                 </div>
               </article>
@@ -177,6 +177,15 @@ const formatDate = (date) =>
     year: "numeric",
     month: "long",
     day: "numeric",
+  });
+
+const formatDateTime = (date) =>
+  new Date(date).toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
   });
 
 const statusClass = (status) =>

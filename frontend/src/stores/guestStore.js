@@ -9,6 +9,8 @@ export const useGuestStore = defineStore("guests", () => {
     activeGuests: 0,
     pendingGuests: 0,
     vipGuests: 0,
+    checkedInGuests: 0,
+    awaitingCheckInGuests: 0,
   });
   const loading = ref(false);
   const loaded = ref(false);
@@ -31,6 +33,8 @@ export const useGuestStore = defineStore("guests", () => {
       activeGuests: activeGuests.value.length,
       pendingGuests: pendingGuests.value.length,
       vipGuests: vipGuests.value.length,
+      checkedInGuests: guests.value.filter((guest) => guest.isCheckedIn).length,
+      awaitingCheckInGuests: guests.value.filter((guest) => !guest.isCheckedIn).length,
     };
     loaded.value = true;
   }
@@ -90,6 +94,12 @@ export const useGuestStore = defineStore("guests", () => {
     return response.data.guest;
   }
 
+  async function checkInGuest(qrCode) {
+    const response = await api.post("/api/guests/check-in", { qrCode });
+    await fetchGuests().catch(() => {});
+    return response.data;
+  }
+
   function reset() {
     guests.value = [];
     error.value = "";
@@ -99,6 +109,8 @@ export const useGuestStore = defineStore("guests", () => {
       activeGuests: 0,
       pendingGuests: 0,
       vipGuests: 0,
+      checkedInGuests: 0,
+      awaitingCheckInGuests: 0,
     };
   }
 
@@ -116,6 +128,7 @@ export const useGuestStore = defineStore("guests", () => {
     getGuestById,
     fetchGuests,
     fetchGuest,
+    checkInGuest,
     ensureLoaded,
     addGuest,
     updateGuest,

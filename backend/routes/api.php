@@ -10,6 +10,7 @@ $router->get('/api/auth/me', [AuthController::class, 'me'], [AuthMiddleware::cla
 $router->post('/api/auth/logout', [AuthController::class, 'logout'], [AuthMiddleware::class]);
 
 $router->get('/api/guests', [GuestController::class, 'index']);
+$router->post('/api/guests/check-in', [GuestController::class, 'checkIn']);
 $router->get('/api/guests/{id}', [GuestController::class, 'show']);
 $router->get('/api/guests/{id}/invitation-ticket', [GuestController::class, 'invitationTicket']);
 $router->post('/api/guests', [GuestController::class, 'store'], [AuthMiddleware::class]);

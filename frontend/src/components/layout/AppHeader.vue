@@ -67,6 +67,7 @@ const authStore = useAuthStore();
 const navItems = [
   { to: "/", label: "Dashboard", icon: "bi bi-grid-1x2-fill" },
   { to: "/guests", label: "Guests", icon: "bi bi-people-fill" },
+  { to: "/check-in-scanner", label: "Scan Check-In", icon: "bi bi-qr-code-scan" },
   { to: "/register", label: "Register", icon: "bi bi-person-plus-fill" },
 ];
 

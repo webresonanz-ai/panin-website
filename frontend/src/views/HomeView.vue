@@ -11,6 +11,10 @@
           </p>
 
           <div class="d-flex flex-wrap gap-2 mt-4">
+            <router-link to="/check-in-scanner" class="btn luxury-btn">
+              <i class="bi bi-qr-code-scan"></i>
+              Scan Check-In
+            </router-link>
             <router-link to="/register" class="btn luxury-btn">
               <i class="bi bi-plus-circle"></i>
               New Registration
@@ -25,8 +29,8 @@
         <div class="col-xl-4">
           <div class="metric-chip">
             <small>Service Snapshot</small>
-            <h3>{{ guestStore.activeGuests.length }}/{{ guestStore.totalGuests }}</h3>
-            <p>stays are currently active and ready for front-desk action.</p>
+            <h3>{{ guestStore.stats.checkedInGuests }}/{{ guestStore.totalGuests }}</h3>
+            <p>guests have cleared arrival and are ready for on-property service.</p>
           </div>
         </div>
       </div>

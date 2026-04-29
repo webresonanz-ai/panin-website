@@ -35,6 +35,12 @@ const router = createRouter({
       component: () => import("@/views/GuestDetailView.vue"),
       meta: { title: "Guest Details" },
     },
+    {
+      path: "/check-in-scanner",
+      name: "check-in-scanner",
+      component: () => import("@/views/CheckInScannerView.vue"),
+      meta: { title: "QR Check-In" },
+    },
   ],
 });
 

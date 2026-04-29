@@ -28,6 +28,7 @@ class GuestRepository
         }
 
         $sql = 'SELECT id, full_name, registration_number, company, position, seat_number, check_in, check_out, status, special_requests, vip_status, created_at, updated_at
+                , checked_in_at, check_in_method
                 FROM guests';
 
         if ($clauses !== []) {
@@ -45,7 +46,7 @@ class GuestRepository
     public function find(int $id): ?array
     {
         $statement = $this->database->connection()->prepare(
-            'SELECT id, full_name, registration_number, company, position, seat_number, check_in, check_out, status, special_requests, vip_status, created_at, updated_at
+            'SELECT id, full_name, registration_number, company, position, seat_number, check_in, check_out, status, special_requests, vip_status, created_at, updated_at, checked_in_at, check_in_method
              FROM guests WHERE id = :id LIMIT 1'
         );
         $statement->execute(['id' => $id]);
@@ -78,6 +79,19 @@ class GuestRepository
         $this->assignRegistrationNumber($guestId);
 
         return $this->find($guestId);
+    }
+
+    public function findByRegistrationNumber(string $registrationNumber): ?array
+    {
+        $statement = $this->database->connection()->prepare(
+            'SELECT id, full_name, registration_number, company, position, seat_number, check_in, check_out, status, special_requests, vip_status, created_at, updated_at, checked_in_at, check_in_method
+             FROM guests WHERE registration_number = :registration_number LIMIT 1'
+        );
+        $statement->execute(['registration_number' => $registrationNumber]);
+
+        $guest = $statement->fetch();
+
+        return $guest ? $this->mapGuest($guest) : null;
     }
 
     public function update(int $id, array $data): ?array
@@ -161,6 +175,23 @@ class GuestRepository
         $statement->execute(['id' => $id]);
     }
 
+    public function markCheckedIn(int $id, string $method = 'qr_scan'): ?array
+    {
+        $statement = $this->database->connection()->prepare(
+            'UPDATE guests
+             SET checked_in_at = COALESCE(checked_in_at, NOW()),
+                 check_in_method = COALESCE(check_in_method, :check_in_method),
+                 updated_at = NOW()
+             WHERE id = :id'
+        );
+        $statement->execute([
+            'id' => $id,
+            'check_in_method' => $method,
+        ]);
+
+        return $this->find($id);
+    }
+
     private function mapGuest(array $guest): array
     {
         return [
@@ -175,6 +206,9 @@ class GuestRepository
             'status' => $guest['status'],
             'specialRequests' => $guest['special_requests'],
             'vipStatus' => (bool) $guest['vip_status'],
+            'checkedInAt' => $guest['checked_in_at'],
+            'checkInMethod' => $guest['check_in_method'],
+            'isCheckedIn' => $guest['checked_in_at'] !== null,
             'createdAt' => $guest['created_at'],
             'updatedAt' => $guest['updated_at'],
         ];

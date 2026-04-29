@@ -34,7 +34,7 @@
             <th>Guest</th>
             <th>Seat</th>
             <th>Stay Window</th>
-            <th>Status</th>
+            <th>Arrival</th>
             <th>Service</th>
             <th class="text-end">Actions</th>
           </tr>
@@ -62,10 +62,15 @@
               </div>
             </td>
             <td>
-              <span :class="statusClass(guest.status)">
-                <span class="timeline-dot"></span>
-                {{ guest.status }}
-              </span>
+              <div class="stay-window">
+                <span :class="guest.isCheckedIn ? 'status-pill status-pill-active' : 'status-pill status-pill-pending'">
+                  <span class="timeline-dot"></span>
+                  {{ guest.isCheckedIn ? "Checked In" : "Waiting" }}
+                </span>
+                <span class="text-luxury-faint">
+                  {{ guest.isCheckedIn ? formatDateTime(guest.checkedInAt) : guest.status }}
+                </span>
+              </div>
             </td>
             <td>
               <span v-if="guest.vipStatus" class="status-pill badge-luxury service-badge">
@@ -157,8 +162,13 @@ const formatDate = (date) =>
     year: "numeric",
   });
 
-const statusClass = (status) =>
-  status === "active" ? "status-pill status-pill-active" : "status-pill status-pill-pending";
+const formatDateTime = (date) =>
+  new Date(date).toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 
 const requireLogin = () => {
   router.push({ name: "login", query: { redirect: "/register" } });
