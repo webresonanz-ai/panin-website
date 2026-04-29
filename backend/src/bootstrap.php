@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+$vendorAutoload = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
+if (is_file($vendorAutoload)) {
+    require $vendorAutoload;
+}
+
 spl_autoload_register(function (string $class): void {
     $prefix = 'App\\';
 

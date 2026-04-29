@@ -235,17 +235,12 @@ class GuestImportService
         }
 
         $seatNumber = $row['seat_number'] ?? '';
-        $slug = $this->slugify($row['full_name']);
-        $seatSlug = $seatNumber !== '' ? $this->slugify($seatNumber) : 'row-' . $rowNumber;
 
         return [
             'fullName' => $row['full_name'],
             'company' => $row['company'] ?? '',
             'position' => $row['position'] ?? '',
             'seatNumber' => $seatNumber,
-            'email' => sprintf('%s-%s@import.local', $slug !== '' ? $slug : 'guest', $seatSlug),
-            'phone' => '',
-            'suite' => $seatNumber !== '' ? 'Seat ' . $seatNumber : 'General Seating',
             'checkIn' => date('Y-m-d'),
             'checkOut' => date('Y-m-d'),
             'specialRequests' => '',
@@ -265,11 +260,4 @@ class GuestImportService
         return true;
     }
 
-    private function slugify(string $value): string
-    {
-        $value = strtolower(trim($value));
-        $value = preg_replace('/[^a-z0-9]+/', '-', $value) ?? '';
-
-        return trim($value, '-');
-    }
 }

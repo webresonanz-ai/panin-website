@@ -6,12 +6,16 @@ use App\Core\ApiException;
 use App\Core\Request;
 use App\Repositories\GuestRepository;
 use App\Services\GuestImportService;
+use App\Utils\ReservationUtil;
+
+require_once dirname(__DIR__, 2) . '/utils/reservationUtil.php';
 
 class GuestController
 {
     public function __construct(
         private readonly GuestRepository $guests,
-        private readonly GuestImportService $guestImportService
+        private readonly GuestImportService $guestImportService,
+        private readonly ReservationUtil $reservationUtil
     )
     {
     }
@@ -103,6 +107,26 @@ class GuestController
         return ['message' => 'Guest deleted successfully.'];
     }
 
+    public function invitationTicket(Request $request): ?array
+    {
+        $guest = $this->guests->find((int) $request->attribute('id'));
+
+        if (!$guest) {
+            throw new ApiException('Guest not found.', 404);
+        }
+
+        $ticket = $this->reservationUtil->generateInvitationTicketPdf($guest);
+
+        http_response_code(200);
+        header('Content-Type: ' . $ticket['mime']);
+        header('Content-Disposition: inline; filename="' . $ticket['filename'] . '"');
+        header('Content-Length: ' . strlen($ticket['content']));
+
+        echo $ticket['content'];
+
+        return null;
+    }
+
     private function validatePayload(array $payload, string $defaultStatus = 'active'): array
     {
         $data = [
@@ -110,9 +134,6 @@ class GuestController
             'company' => trim((string) ($payload['company'] ?? '')),
             'position' => trim((string) ($payload['position'] ?? '')),
             'seatNumber' => trim((string) ($payload['seatNumber'] ?? '')),
-            'email' => trim((string) ($payload['email'] ?? '')),
-            'phone' => trim((string) ($payload['phone'] ?? '')),
-            'suite' => trim((string) ($payload['suite'] ?? '')),
             'checkIn' => trim((string) ($payload['checkIn'] ?? '')),
             'checkOut' => trim((string) ($payload['checkOut'] ?? '')),
             'specialRequests' => trim((string) ($payload['specialRequests'] ?? '')),
@@ -122,14 +143,10 @@ class GuestController
 
         $errors = [];
 
-        foreach (['fullName', 'email', 'suite', 'checkIn', 'checkOut'] as $field) {
+        foreach (['fullName', 'checkIn', 'checkOut'] as $field) {
             if ($data[$field] === '') {
                 $errors[$field][] = 'This field is required.';
             }
-        }
-
-        if ($data['email'] !== '' && !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
-            $errors['email'][] = 'Please provide a valid email address.';
         }
 
         if (!in_array($data['status'], ['active', 'pending'], true)) {

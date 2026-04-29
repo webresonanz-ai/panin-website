@@ -22,12 +22,10 @@ CREATE TABLE IF NOT EXISTS api_tokens (
 CREATE TABLE IF NOT EXISTS guests (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     full_name VARCHAR(150) NOT NULL,
+    registration_number VARCHAR(64) NULL UNIQUE,
     company VARCHAR(150) NULL,
     position VARCHAR(150) NULL,
     seat_number VARCHAR(50) NULL,
-    email VARCHAR(190) NOT NULL,
-    phone VARCHAR(40) NULL,
-    suite VARCHAR(100) NOT NULL,
     check_in DATE NOT NULL,
     check_out DATE NOT NULL,
     status ENUM('active', 'pending') NOT NULL DEFAULT 'active',
@@ -40,6 +38,59 @@ CREATE TABLE IF NOT EXISTS guests (
 ALTER TABLE guests ADD COLUMN IF NOT EXISTS company VARCHAR(150) NULL AFTER full_name;
 ALTER TABLE guests ADD COLUMN IF NOT EXISTS position VARCHAR(150) NULL AFTER company;
 ALTER TABLE guests ADD COLUMN IF NOT EXISTS seat_number VARCHAR(50) NULL AFTER position;
+ALTER TABLE guests ADD COLUMN IF NOT EXISTS registration_number VARCHAR(64) NULL AFTER full_name;
+
+UPDATE guests
+SET registration_number = CONCAT(
+    'PANIN_',
+    id,
+    '_',
+    UNIX_TIMESTAMP(created_at),
+    '_',
+    UPPER(SUBSTRING(MD5(CONCAT(id, '-', created_at)), 1, 4))
+)
+WHERE registration_number IS NULL OR registration_number = '';
+
+ALTER TABLE guests MODIFY COLUMN registration_number VARCHAR(64) NOT NULL;
+
+SET @drop_guest_email = IF(
+    EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = DATABASE() AND table_name = 'guests' AND column_name = 'email'
+    ),
+    'ALTER TABLE guests DROP COLUMN email',
+    'SELECT 1'
+);
+PREPARE stmt FROM @drop_guest_email;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @drop_guest_phone = IF(
+    EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = DATABASE() AND table_name = 'guests' AND column_name = 'phone'
+    ),
+    'ALTER TABLE guests DROP COLUMN phone',
+    'SELECT 1'
+);
+PREPARE stmt FROM @drop_guest_phone;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @drop_guest_suite = IF(
+    EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = DATABASE() AND table_name = 'guests' AND column_name = 'suite'
+    ),
+    'ALTER TABLE guests DROP COLUMN suite',
+    'SELECT 1'
+);
+PREPARE stmt FROM @drop_guest_suite;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
 INSERT INTO users (name, email, password_hash)
 SELECT 'Front Desk Admin', 'admin@luxuryhotel.test', '$2y$12$D002k3/UfVMYxorR896X8erG89F9GtQeLjDnFdc8wAQ79TYa68qA.'
@@ -47,14 +98,14 @@ WHERE NOT EXISTS (
     SELECT 1 FROM users WHERE email = 'admin@luxuryhotel.test'
 );
 
-INSERT INTO guests (full_name, company, position, seat_number, email, phone, suite, check_in, check_out, status, special_requests, vip_status)
-SELECT 'Isabella Rossi', 'Rossi Holdings', 'Chairwoman', 'A01', 'isabella.rossi@email.com', '+39 123 456 7890', 'Imperial Suite', '2026-04-30', '2026-05-05', 'active', 'Champagne upon arrival, Extra pillows', 1
-WHERE NOT EXISTS (SELECT 1 FROM guests WHERE email = 'isabella.rossi@email.com');
+INSERT INTO guests (full_name, company, position, seat_number, check_in, check_out, status, special_requests, vip_status)
+SELECT 'Isabella Rossi', 'Rossi Holdings', 'Chairwoman', 'A01', '2026-04-30', '2026-05-05', 'active', 'Champagne upon arrival, Extra pillows', 1
+WHERE NOT EXISTS (SELECT 1 FROM guests WHERE full_name = 'Isabella Rossi' AND seat_number = 'A01');
 
-INSERT INTO guests (full_name, company, position, seat_number, email, phone, suite, check_in, check_out, status, special_requests, vip_status)
-SELECT 'Alexander Chen', 'Chen Ventures', 'Managing Director', 'B14', 'alex.chen@email.com', '+86 987 654 3210', 'Royal Penthouse', '2026-05-01', '2026-05-07', 'pending', 'Vegan meal plan, Airport transfer', 1
-WHERE NOT EXISTS (SELECT 1 FROM guests WHERE email = 'alex.chen@email.com');
+INSERT INTO guests (full_name, company, position, seat_number, check_in, check_out, status, special_requests, vip_status)
+SELECT 'Alexander Chen', 'Chen Ventures', 'Managing Director', 'B14', '2026-05-01', '2026-05-07', 'pending', 'Vegan meal plan, Airport transfer', 1
+WHERE NOT EXISTS (SELECT 1 FROM guests WHERE full_name = 'Alexander Chen' AND seat_number = 'B14');
 
-INSERT INTO guests (full_name, company, position, seat_number, email, phone, suite, check_in, check_out, status, special_requests, vip_status)
-SELECT 'Victoria Sterling', 'Sterling & Co.', 'Brand Director', 'C07', 'vicky.sterling@email.com', '+44 20 1234 5678', 'Diamond Suite', '2026-05-03', '2026-05-06', 'active', 'Spa appointments daily', 0
-WHERE NOT EXISTS (SELECT 1 FROM guests WHERE email = 'vicky.sterling@email.com');
+INSERT INTO guests (full_name, company, position, seat_number, check_in, check_out, status, special_requests, vip_status)
+SELECT 'Victoria Sterling', 'Sterling & Co.', 'Brand Director', 'C07', '2026-05-03', '2026-05-06', 'active', 'Spa appointments daily', 0
+WHERE NOT EXISTS (SELECT 1 FROM guests WHERE full_name = 'Victoria Sterling' AND seat_number = 'C07');

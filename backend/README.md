@@ -12,8 +12,14 @@ Minimal PHP 8 + MySQL API for the Vue frontend.
 
 ## Setup
 
-1. Copy `backend/.env.example` to `backend/.env`
-2. Update the database credentials in `backend/.env`
+1. Update the database credentials in `backend/.env`
+2. Install backend dependencies:
+
+```bash
+cd backend
+composer install
+```
+
 3. Import `backend/database/schema.sql` into MySQL
 4. Start the API:
 
@@ -40,10 +46,20 @@ npm run dev
 - `POST /api/auth/logout`
 - `GET /api/guests`
 - `GET /api/guests/{id}`
+- `GET /api/guests/{id}/invitation-ticket`
 - `POST /api/guests`
 - `POST /api/guests/import`
 - `PUT /api/guests/{id}`
 - `DELETE /api/guests/{id}`
+
+## Invitation Ticket PDF
+
+Use `GET /api/guests/{id}/invitation-ticket` to generate a PDF invitation ticket for a guest. The endpoint returns `application/pdf` inline and uses the shared invitation template at `backend/templates/panin_invitation.png`.
+
+Required runtime support:
+
+- Composer dependencies from `backend/composer.json`
+- PHP GD extension enabled
 
 ## Excel Import
 
@@ -56,4 +72,4 @@ Required spreadsheet columns:
 - `position`
 - `seat_number`
 
-Imported rows are saved into `guests`, and the backend auto-fills the existing required fields (`email`, `suite`, `check_in`, `check_out`, `status`) with import-safe defaults.
+Imported rows are saved into `guests`, and the backend auto-fills the remaining required stay fields (`check_in`, `check_out`, `status`) with import-safe defaults.

@@ -6,7 +6,7 @@
           <div>
             <div class="eyebrow">Guest Dossier</div>
             <h1 class="hero-title">{{ guest.fullName }}</h1>
-            <p class="hero-subtitle">{{ guest.email }} | {{ guest.phone || "Phone not provided" }}</p>
+            <p class="hero-subtitle">{{ guest.company || "Independent Guest" }} | {{ guest.position || "Profile pending" }}</p>
           </div>
 
           <div class="d-flex flex-wrap gap-2">
@@ -62,8 +62,8 @@
                 <div class="col-md-6">
                   <article class="info-row h-100 align-items-start">
                     <div>
-                      <div class="text-luxury-faint small text-uppercase">Suite</div>
-                      <div class="fw-bold text-white mt-1">{{ guest.suite }}</div>
+                      <div class="text-luxury-faint small text-uppercase">Seat Number</div>
+                      <div class="fw-bold text-white mt-1">{{ guest.seatNumber || "Unassigned" }}</div>
                     </div>
                   </article>
                 </div>
@@ -79,9 +79,9 @@
                 <div class="col-md-6">
                   <article class="info-row h-100 align-items-start">
                     <div>
-                      <div class="text-luxury-faint small text-uppercase">Guest Contact</div>
-                      <div class="fw-bold text-white mt-1">{{ guest.email }}</div>
-                      <div class="text-luxury-soft small">{{ guest.phone || "No phone listed" }}</div>
+                      <div class="text-luxury-faint small text-uppercase">Guest Profile</div>
+                      <div class="fw-bold text-white mt-1">{{ guest.company || "Independent Guest" }}</div>
+                      <div class="text-luxury-soft small">{{ guest.position || "Position not listed" }}</div>
                     </div>
                   </article>
                 </div>

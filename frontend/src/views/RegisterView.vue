@@ -32,7 +32,7 @@
               <span class="timeline-dot"></span>
               <div>
                 <div class="fw-bold text-white">Confirm stay window</div>
-                <div class="text-luxury-faint small">Check-in and check-out dates should align with the booked suite tier.</div>
+                <div class="text-luxury-faint small">Check-in and check-out dates should align with the guest's confirmed arrival plan.</div>
               </div>
             </article>
             <article class="info-row">

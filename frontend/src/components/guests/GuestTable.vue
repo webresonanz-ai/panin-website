@@ -9,7 +9,7 @@
       <div class="table-toolbar__controls">
         <div class="search-shell">
           <i class="bi bi-search"></i>
-          <input v-model="searchQuery" type="text" class="search-input" placeholder="Search name, email, or suite" />
+          <input v-model="searchQuery" type="text" class="search-input" placeholder="Search name, company, position, or seat" />
         </div>
 
         <div class="status-filter" role="tablist" aria-label="Filter guest status">
@@ -32,7 +32,7 @@
         <thead>
           <tr>
             <th>Guest</th>
-            <th>Suite</th>
+            <th>Seat</th>
             <th>Stay Window</th>
             <th>Status</th>
             <th>Service</th>
@@ -48,12 +48,12 @@
                 </div>
                 <div>
                   <div class="fw-bold">{{ guest.fullName }}</div>
-                  <div class="text-luxury-faint small">{{ guest.email }}</div>
+                  <div class="text-luxury-faint small">{{ guest.company || guest.position || "Guest profile" }}</div>
                 </div>
               </div>
             </td>
             <td>
-              <span class="badge-luxury">{{ guest.suite }}</span>
+              <span class="badge-luxury">{{ guest.seatNumber || "Unassigned" }}</span>
             </td>
             <td>
               <div class="stay-window">
@@ -130,8 +130,9 @@ const filteredGuests = computed(() => {
     const matchesQuery =
       !query ||
       guest.fullName.toLowerCase().includes(query) ||
-      guest.email.toLowerCase().includes(query) ||
-      guest.suite.toLowerCase().includes(query);
+      (guest.company || "").toLowerCase().includes(query) ||
+      (guest.position || "").toLowerCase().includes(query) ||
+      (guest.seatNumber || "").toLowerCase().includes(query);
 
     const matchesStatus =
       statusFilter.value === "all" ||

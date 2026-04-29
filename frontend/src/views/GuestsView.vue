@@ -4,7 +4,7 @@
       <div class="row g-4 align-items-end">
         <div class="col-lg-8">
           <div class="eyebrow">Guest Portfolio</div>
-          <h1 class="hero-title">Every stay, suite, and service signal in one refined manifest.</h1>
+          <h1 class="hero-title">Every stay and service signal in one refined manifest.</h1>
           <p class="hero-subtitle">
             Browse the full roster, prioritize arrivals, and act quickly without losing the premium tone.
           </p>

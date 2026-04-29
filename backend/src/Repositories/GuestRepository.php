@@ -16,7 +16,7 @@ class GuestRepository
         $params = [];
 
         if ($search) {
-            $clauses[] = '(full_name LIKE :search OR company LIKE :search OR position LIKE :search OR seat_number LIKE :search OR email LIKE :search OR suite LIKE :search)';
+            $clauses[] = '(full_name LIKE :search OR company LIKE :search OR position LIKE :search OR seat_number LIKE :search)';
             $params['search'] = '%' . $search . '%';
         }
 
@@ -27,7 +27,7 @@ class GuestRepository
             $params['status'] = $status;
         }
 
-        $sql = 'SELECT id, full_name, company, position, seat_number, email, phone, suite, check_in, check_out, status, special_requests, vip_status, created_at, updated_at
+        $sql = 'SELECT id, full_name, registration_number, company, position, seat_number, check_in, check_out, status, special_requests, vip_status, created_at, updated_at
                 FROM guests';
 
         if ($clauses !== []) {
@@ -45,7 +45,7 @@ class GuestRepository
     public function find(int $id): ?array
     {
         $statement = $this->database->connection()->prepare(
-            'SELECT id, full_name, company, position, seat_number, email, phone, suite, check_in, check_out, status, special_requests, vip_status, created_at, updated_at
+            'SELECT id, full_name, registration_number, company, position, seat_number, check_in, check_out, status, special_requests, vip_status, created_at, updated_at
              FROM guests WHERE id = :id LIMIT 1'
         );
         $statement->execute(['id' => $id]);
@@ -57,18 +57,16 @@ class GuestRepository
 
     public function create(array $data): array
     {
-        $statement = $this->database->connection()->prepare(
-            'INSERT INTO guests (full_name, company, position, seat_number, email, phone, suite, check_in, check_out, status, special_requests, vip_status, created_at, updated_at)
-             VALUES (:full_name, :company, :position, :seat_number, :email, :phone, :suite, :check_in, :check_out, :status, :special_requests, :vip_status, NOW(), NOW())'
+        $connection = $this->database->connection();
+        $statement = $connection->prepare(
+            'INSERT INTO guests (full_name, company, position, seat_number, check_in, check_out, status, special_requests, vip_status, created_at, updated_at)
+             VALUES (:full_name, :company, :position, :seat_number, :check_in, :check_out, :status, :special_requests, :vip_status, NOW(), NOW())'
         );
         $statement->execute([
             'full_name' => $data['fullName'],
             'company' => $data['company'] ?: null,
             'position' => $data['position'] ?: null,
             'seat_number' => $data['seatNumber'] ?: null,
-            'email' => $data['email'],
-            'phone' => $data['phone'] ?: null,
-            'suite' => $data['suite'],
             'check_in' => $data['checkIn'],
             'check_out' => $data['checkOut'],
             'status' => $data['status'],
@@ -76,7 +74,10 @@ class GuestRepository
             'vip_status' => $data['vipStatus'] ? 1 : 0,
         ]);
 
-        return $this->find((int) $this->database->connection()->lastInsertId());
+        $guestId = (int) $connection->lastInsertId();
+        $this->assignRegistrationNumber($guestId);
+
+        return $this->find($guestId);
     }
 
     public function update(int $id, array $data): ?array
@@ -87,9 +88,6 @@ class GuestRepository
                  company = :company,
                  position = :position,
                  seat_number = :seat_number,
-                 email = :email,
-                 phone = :phone,
-                 suite = :suite,
                  check_in = :check_in,
                  check_out = :check_out,
                  status = :status,
@@ -104,9 +102,6 @@ class GuestRepository
             'company' => $data['company'] ?: null,
             'position' => $data['position'] ?: null,
             'seat_number' => $data['seatNumber'] ?: null,
-            'email' => $data['email'],
-            'phone' => $data['phone'] ?: null,
-            'suite' => $data['suite'],
             'check_in' => $data['checkIn'],
             'check_out' => $data['checkOut'],
             'status' => $data['status'],
@@ -125,8 +120,8 @@ class GuestRepository
 
         $connection = $this->database->connection();
         $statement = $connection->prepare(
-            'INSERT INTO guests (full_name, company, position, seat_number, email, phone, suite, check_in, check_out, status, special_requests, vip_status, created_at, updated_at)
-             VALUES (:full_name, :company, :position, :seat_number, :email, :phone, :suite, :check_in, :check_out, :status, :special_requests, :vip_status, NOW(), NOW())'
+            'INSERT INTO guests (full_name, company, position, seat_number, check_in, check_out, status, special_requests, vip_status, created_at, updated_at)
+             VALUES (:full_name, :company, :position, :seat_number, :check_in, :check_out, :status, :special_requests, :vip_status, NOW(), NOW())'
         );
 
         $connection->beginTransaction();
@@ -138,15 +133,14 @@ class GuestRepository
                     'company' => $row['company'] ?: null,
                     'position' => $row['position'] ?: null,
                     'seat_number' => $row['seatNumber'] ?: null,
-                    'email' => $row['email'],
-                    'phone' => $row['phone'] ?: null,
-                    'suite' => $row['suite'],
                     'check_in' => $row['checkIn'],
                     'check_out' => $row['checkOut'],
                     'status' => $row['status'],
                     'special_requests' => $row['specialRequests'] ?: null,
                     'vip_status' => $row['vipStatus'] ? 1 : 0,
                 ]);
+
+                $this->assignRegistrationNumber((int) $connection->lastInsertId());
             }
 
             $connection->commit();
@@ -172,12 +166,10 @@ class GuestRepository
         return [
             'id' => (int) $guest['id'],
             'fullName' => $guest['full_name'],
+            'registrationNumber' => $guest['registration_number'],
             'company' => $guest['company'],
             'position' => $guest['position'],
             'seatNumber' => $guest['seat_number'],
-            'email' => $guest['email'],
-            'phone' => $guest['phone'],
-            'suite' => $guest['suite'],
             'checkIn' => $guest['check_in'],
             'checkOut' => $guest['check_out'],
             'status' => $guest['status'],
@@ -186,5 +178,38 @@ class GuestRepository
             'createdAt' => $guest['created_at'],
             'updatedAt' => $guest['updated_at'],
         ];
+    }
+
+    private function assignRegistrationNumber(int $guestId): void
+    {
+        $guest = $this->database->connection()->prepare(
+            'SELECT id, created_at FROM guests WHERE id = :id LIMIT 1'
+        );
+        $guest->execute(['id' => $guestId]);
+        $record = $guest->fetch();
+
+        if (!$record) {
+            return;
+        }
+
+        $createdAtTimestamp = strtotime((string) $record['created_at']);
+        $createdAtToken = $createdAtTimestamp === false ? time() : $createdAtTimestamp;
+        $randomSuffix = $this->randomRegistrationSuffix();
+
+        $statement = $this->database->connection()->prepare(
+            'UPDATE guests
+             SET registration_number = :registration_number
+             WHERE id = :id AND (registration_number IS NULL OR registration_number = \'\')'
+        );
+
+        $statement->execute([
+            'registration_number' => sprintf('PANIN_%d_%s_%s', $guestId, $createdAtToken, $randomSuffix),
+            'id' => $guestId,
+        ]);
+    }
+
+    private function randomRegistrationSuffix(): string
+    {
+        return strtoupper(substr(bin2hex(random_bytes(2)), 0, 4));
     }
 }

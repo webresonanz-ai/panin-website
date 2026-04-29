@@ -54,7 +54,7 @@
               <div class="guest-avatar-small">{{ guest.fullName.charAt(0) }}</div>
               <div class="flex-grow-1">
                 <div class="fw-bold text-white">{{ guest.fullName }}</div>
-                <div class="text-luxury-faint small">{{ guest.suite }} | {{ guest.email }}</div>
+                <div class="text-luxury-faint small">{{ guest.seatNumber || "Unassigned seat" }} | {{ guest.company || "Independent Guest" }}</div>
               </div>
               <span :class="statusClass(guest.status)">
                 <span class="timeline-dot"></span>
@@ -93,7 +93,7 @@
               <span class="timeline-dot"></span>
               <div>
                 <div class="fw-bold text-white">Arrival pacing</div>
-                <div class="text-luxury-faint small">Pending guests are clustered around premium suites.</div>
+                <div class="text-luxury-faint small">Pending guests are concentrated around the next check-in wave.</div>
               </div>
             </article>
             <article class="info-row">

@@ -20,7 +20,7 @@
       <div class="form-section">
         <h4 class="panel-title">Guest Profile</h4>
         <div class="row g-3 mt-1">
-          <div class="col-md-6">
+          <div class="col-md-12">
             <label class="form-label text-luxury-soft">Full Name *</label>
             <div class="input-group">
               <span class="input-group-text border-accent">
@@ -36,48 +36,6 @@
             </div>
           </div>
 
-          <div class="col-md-6">
-            <label class="form-label text-luxury-soft">Email *</label>
-            <div class="input-group">
-              <span class="input-group-text border-accent">
-                <i class="bi bi-envelope"></i>
-              </span>
-              <input
-                v-model="form.email"
-                type="email"
-                class="form-control luxury-input"
-                required
-                placeholder="guest@email.com"
-              />
-            </div>
-          </div>
-
-          <div class="col-md-6">
-            <label class="form-label text-luxury-soft">Phone</label>
-            <div class="input-group">
-              <span class="input-group-text border-accent">
-                <i class="bi bi-telephone"></i>
-              </span>
-              <input
-                v-model="form.phone"
-                type="tel"
-                class="form-control luxury-input"
-                placeholder="+1 234 567 890"
-              />
-            </div>
-          </div>
-
-          <div class="col-md-6">
-            <label class="form-label text-luxury-soft">Suite *</label>
-            <select v-model="form.suite" class="form-select select-luxury" required>
-              <option value="">Select Suite</option>
-              <option value="Imperial Suite">Imperial Suite</option>
-              <option value="Royal Penthouse">Royal Penthouse</option>
-              <option value="Diamond Suite">Diamond Suite</option>
-              <option value="Presidential Suite">Presidential Suite</option>
-              <option value="Grand Deluxe">Grand Deluxe</option>
-            </select>
-          </div>
         </div>
       </div>
 
@@ -146,9 +104,6 @@ const emit = defineEmits(["submit", "cancel"]);
 
 const defaultForm = () => ({
   fullName: "",
-  email: "",
-  phone: "",
-  suite: "",
   checkIn: "",
   checkOut: "",
   specialRequests: "",
