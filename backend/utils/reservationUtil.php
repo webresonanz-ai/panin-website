@@ -72,14 +72,12 @@ class ReservationUtil
         $company = trim((string) ($guest['company'] ?? ''));
         $position = trim((string) ($guest['position'] ?? ''));
         $seatNumber = trim((string) ($guest['seatNumber'] ?? ''));
-        $checkIn = $this->formatDate((string) ($guest['checkIn'] ?? ''));
-        $checkOut = $this->formatDate((string) ($guest['checkOut'] ?? ''));
 
         $qrImage = $this->buildQrImage($guest);
         if ($qrImage !== null) {
             $qrSize = (int) round(min($width, $height) * 0.16);
             $qrX = (int) round(($width - $qrSize) / 2);
-            $qrY = (int) round($height * 0.33);
+            $qrY = (int) round($height * 0.767);
             imagecopyresampled(
                 $image,
                 $qrImage,
@@ -94,33 +92,24 @@ class ReservationUtil
             );
         }
 
-        $this->drawCenteredText($image, $fontPath, $fullName, (int) round($width * 0.028), (int) round($height * 0.72), $darkText);
+        $this->drawCenteredText($image, $fontPath, $fullName, (int) round($width * 0.028), (int) round($height * 0.46), $darkText);
 
         if ($company !== '') {
-            $this->drawCenteredText($image, $fontPath, $company, (int) round($width * 0.017), (int) round($height * 0.765), $mutedText);
+            $this->drawCenteredText($image, $fontPath, $company, (int) round($width * 0.025), (int) round($height * 0.58), $mutedText);
         }
 
         if ($position !== '') {
-            $this->drawCenteredText($image, $fontPath, $position, (int) round($width * 0.015), (int) round($height * 0.8), $mutedText);
+            $this->drawCenteredText($image, $fontPath, $position, (int) round($width * 0.025), (int) round($height * 0.68), $mutedText);
         }
 
-        $this->drawCenteredText(
-            $image,
-            $fontPath,
-            'Seat ' . ($seatNumber !== '' ? $seatNumber : 'Unassigned'),
-            (int) round($width * 0.02),
-            (int) round($height * 0.59),
-            $darkText
-        );
-
-        $this->drawCenteredText(
-            $image,
-            $fontPath,
-            $checkIn . ' - ' . $checkOut,
-            (int) round($width * 0.014),
-            (int) round($height * 0.855),
-            $mutedText
-        );
+        // $this->drawCenteredText(
+        //     $image,
+        //     $fontPath,
+        //     'Seat ' . ($seatNumber !== '' ? $seatNumber : 'Unassigned'),
+        //     (int) round($width * 0.02),
+        //     (int) round($height * 0.59),
+        //     $darkText
+        // );
 
         $tempFile = tempnam(sys_get_temp_dir(), 'guest-ticket-');
         if ($tempFile === false) {
