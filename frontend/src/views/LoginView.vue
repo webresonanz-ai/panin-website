@@ -6,12 +6,15 @@
           <div class="eyebrow">Staff Access</div>
           <h1 class="hero-title">Secure the concierge workflow before the next arrival wave.</h1>
           <p class="hero-subtitle">
-            Sign in to manage reservations, service signals, and guest records through the protected desk dashboard.
+            Sign in to manage reservations, service signals, and guest records through the protected
+            desk dashboard.
           </p>
 
           <div class="luxury-card p-4 mt-4 login-note">
             <h3 class="panel-title mb-2">Starter Credentials</h3>
-            <p class="panel-subtitle mb-1">Use the seeded admin account while you wire your own users.</p>
+            <p class="panel-subtitle mb-1">
+              Use the seeded admin account while you wire your own users.
+            </p>
             <div class="text-luxury-soft small">Email: admin@luxuryhotel.test</div>
             <div class="text-luxury-soft small">Password: password123</div>
           </div>
@@ -22,7 +25,9 @@
         <section class="luxury-card p-4 p-lg-5 animate-fade-in animate-delayed">
           <div class="eyebrow">Protected Login</div>
           <h2 class="section-title mb-2">Front desk authentication</h2>
-          <p class="section-copy mb-4">Only authenticated staff can access the guest manifest and registration tools.</p>
+          <p class="section-copy mb-4">
+            Only authenticated staff can access the guest manifest and registration tools.
+          </p>
 
           <form class="form-layout mt-0" @submit.prevent="handleSubmit">
             <div>
@@ -32,7 +37,12 @@
 
             <div>
               <label class="form-label text-luxury-soft">Password</label>
-              <input v-model="form.password" type="password" class="form-control luxury-input" required />
+              <input
+                v-model="form.password"
+                type="password"
+                class="form-control luxury-input mb-3"
+                required
+              />
             </div>
 
             <div v-if="errorMessage" class="alert alert-danger mb-0">{{ errorMessage }}</div>
