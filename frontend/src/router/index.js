@@ -39,7 +39,7 @@ const router = createRouter({
       path: "/check-in-scanner",
       name: "check-in-scanner",
       component: () => import("@/views/CheckInScannerView.vue"),
-      meta: { title: "QR Check-In" },
+      meta: { title: "QR Check-In", hideHeader: true },
     },
   ],
 });
@@ -47,7 +47,7 @@ const router = createRouter({
 router.beforeEach(async (to) => {
   const authStore = useAuthStore(pinia);
 
-  document.title = `${to.meta.title} | Luxury Hotel`;
+  document.title = `${to.meta.title} | Panin`;
 
   if (!authStore.authChecked) {
     await authStore.bootstrap();

@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <AppHeader />
+    <AppHeader v-if="!route.meta.hideHeader" />
     <main class="app-shell">
       <router-view v-slot="{ Component }">
         <transition name="page-shift" mode="out-in">
@@ -12,11 +12,14 @@
 </template>
 
 <script setup>
+import { useRoute } from "vue-router";
 import AppHeader from "@/components/layout/AppHeader.vue";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "@/assets/styles/custom.scss";
+
+const route = useRoute();
 </script>
 
 <style>

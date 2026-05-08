@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://panin.resonanz.id/sitemap.xml
