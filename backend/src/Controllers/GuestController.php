@@ -3,9 +3,11 @@
 namespace App\Controllers;
 
 use App\Core\ApiException;
+use App\Core\Config;
 use App\Core\Request;
 use App\Repositories\GuestRepository;
 use App\Services\GuestImportService;
+use App\Services\WasenderService;
 use App\Utils\ReservationUtil;
 
 require_once dirname(__DIR__, 2) . '/utils/reservationUtil.php';
@@ -15,9 +17,39 @@ class GuestController
     public function __construct(
         private readonly GuestRepository $guests,
         private readonly GuestImportService $guestImportService,
-        private readonly ReservationUtil $reservationUtil
-    )
+        private readonly ReservationUtil $reservationUtil,
+        private readonly WasenderService $wasender,
+        private readonly Config $config
+    ) {
+    }
+
+    public function sendInvitation(Request $request): array
     {
+        $id = (int) $request->attribute('id');
+        $guest = $this->guests->find($id);
+
+        if (!$guest) {
+            throw new ApiException('Guest not found.', 404);
+        }
+
+        $phoneNumber = trim((string) ($guest['phoneNumber'] ?? ''));
+
+        if ($phoneNumber === '') {
+            throw new ApiException('Guest does not have a phone number.', 422, [
+                'phone' => ['This guest cannot receive a WhatsApp message.'],
+            ]);
+        }
+
+        $appUrl = rtrim($this->config->get('app.url', ''), '/');
+        $documentUrl = "{$appUrl}/api/guests/{$guest['id']}/invitation-ticket";
+        $fileName = "Invitation - {$guest['fullName']}.pdf";
+
+        $result = $this->wasender->sendDocument($phoneNumber, $documentUrl, $fileName);
+
+        return [
+            'message' => 'Invitation sent successfully via WhatsApp.',
+            'data' => $result,
+        ];
     }
 
     public function index(Request $request): array
@@ -181,6 +213,7 @@ class GuestController
             'fullName' => trim((string) ($payload['fullName'] ?? '')),
             'gaSoPosition' => trim((string) ($payload['gaSoPosition'] ?? '')),
             'seatNumber' => trim((string) ($payload['seatNumber'] ?? '')),
+            'phoneNumber' => trim((string) ($payload['phoneNumber'] ?? '')),
         ];
 
         $errors = [];

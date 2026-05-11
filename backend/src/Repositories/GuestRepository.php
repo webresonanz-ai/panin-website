@@ -98,6 +98,7 @@ class GuestRepository
              SET full_name = :full_name,
                  ga_so_position = :ga_so_position,
                  seat_number = :seat_number,
+                 phone_number = :phone_number,
                  checked_in_at = :checked_in_at,
                  check_in_method = :check_in_method,
                  updated_at = NOW()
@@ -108,8 +109,9 @@ class GuestRepository
             'full_name' => $data['fullName'],
             'ga_so_position' => $data['gaSoPosition'] ?: null,
             'seat_number' => $data['seatNumber'] ?: null,
-            'checked_in_at' => $data['checkedInAt'] ?: null,
-            'check_in_method' => $data['checkInMethod'] ?: null,
+            'phone_number' => $data['phoneNumber'] ?? null,
+            'checked_in_at' => $data['checkedInAt'] ?? null,
+            'check_in_method' => $data['checkInMethod'] ?? null,
         ]);
 
         return $this->find($id);
@@ -184,6 +186,7 @@ class GuestRepository
             'registrationNumber' => $guest['registration_number'],
             'gaSoPosition' => $guest['ga_so_position'],
             'seatNumber' => $guest['seat_number'],
+            'phoneNumber' => $guest['phone_number'],
             'checkedInAt' => $guest['checked_in_at'],
             'checkInMethod' => $guest['check_in_method'],
             'isCheckedIn' => $guest['checked_in_at'] !== null,
