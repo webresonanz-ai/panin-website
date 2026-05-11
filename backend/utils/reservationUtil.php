@@ -75,9 +75,9 @@ class ReservationUtil
 
         $qrImage = $this->buildQrImage($guest);
         if ($qrImage !== null) {
-            $qrSize = (int) round(min($width, $height) * 0.21);
-            $qrX = (int) round(($width - $qrSize) / 2);
-            $qrY = (int) round($height * 0.76);
+            $qrSize = (int) round(min($width, $height) * 0.20);
+            $qrX = (int) round(($width - $qrSize) / 2) - 7;
+            $qrY = (int) round($height * 0.765);
             imagecopyresampled(
                 $image,
                 $qrImage,
@@ -92,10 +92,11 @@ class ReservationUtil
             );
         }
 
-        $this->drawCenteredText($image, $fontPath, $fullName, (int) round($width * 0.028), (int) round($height * 0.52), $darkText);
+        $boldFontPath = dirname(__DIR__) . '/templates/fonts/Cinzel/static/Cinzel-Bold.ttf';
+        $this->drawCenteredText($image, $boldFontPath, $fullName, (int) round($width * 0.028), (int) round($height * 0.52), $darkText);
 
         if ($company !== '') {
-            $this->drawCenteredText($image, $fontPath, $company, (int) round($width * 0.025), (int) round($height * 0.60), $mutedText);
+            $this->drawCenteredText($image, $fontPath, $company, (int) round($width * 0.025), (int) round($height * 0.60), $darkText);
         }
 
         // if ($position !== '') {
@@ -104,9 +105,9 @@ class ReservationUtil
 
         $this->drawCenteredText(
             $image,
-            $fontPath,
+            $boldFontPath,
             'Seat ' . ($seatNumber !== '' ? $seatNumber : 'Unassigned'),
-            (int) round($width * 0.02),
+            (int) round($width * 0.03),
             (int) round($height * 0.69),
             $darkText
         );
@@ -170,6 +171,7 @@ class ReservationUtil
     private function resolveFontPath(): ?string
     {
         $candidates = [
+            dirname(__DIR__) . '/templates/fonts/Cinzel/static/Cinzel-Regular.ttf',
             dirname(__DIR__) . '/templates/fonts/IBMPlexSerif-Regular.ttf',
             'C:/Windows/Fonts/georgia.ttf',
             'C:/Windows/Fonts/times.ttf',
