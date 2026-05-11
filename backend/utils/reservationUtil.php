@@ -66,11 +66,9 @@ class ReservationUtil
         $fontPath = $this->resolveFontPath();
 
         $darkText = imagecolorallocate($image, 31, 35, 45);
-        $mutedText = imagecolorallocate($image, 94, 101, 122);
 
         $fullName = $this->requiredValue($guest, 'fullName');
-        $company = trim((string) ($guest['company'] ?? ''));
-        $position = trim((string) ($guest['position'] ?? ''));
+        $gaSoPosition = trim((string) ($guest['gaSoPosition'] ?? ''));
         $seatNumber = trim((string) ($guest['seatNumber'] ?? ''));
 
         $qrImage = $this->buildQrImage($guest);
@@ -95,13 +93,9 @@ class ReservationUtil
         $boldFontPath = dirname(__DIR__) . '/templates/fonts/Cinzel/static/Cinzel-Bold.ttf';
         $this->drawCenteredText($image, $boldFontPath, $fullName, (int) round($width * 0.028), (int) round($height * 0.52), $darkText);
 
-        if ($company !== '') {
-            $this->drawCenteredText($image, $fontPath, $company, (int) round($width * 0.025), (int) round($height * 0.60), $darkText);
+        if ($gaSoPosition !== '') {
+            $this->drawCenteredText($image, $fontPath, $gaSoPosition, (int) round($width * 0.025), (int) round($height * 0.60), $darkText);
         }
-
-        // if ($position !== '') {
-        //     $this->drawCenteredText($image, $fontPath, $position, (int) round($width * 0.025), (int) round($height * 0.68), $mutedText);
-        // }
 
         $this->drawCenteredText(
             $image,

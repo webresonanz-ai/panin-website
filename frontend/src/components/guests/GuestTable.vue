@@ -9,7 +9,12 @@
       <div class="table-toolbar__controls">
         <div class="search-shell">
           <i class="bi bi-search"></i>
-          <input v-model="searchQuery" type="text" class="search-input" placeholder="Search name, company, position, or seat" />
+          <input
+            v-model="searchQuery"
+            type="text"
+            class="search-input"
+            placeholder="Search name, company, position, or seat"
+          />
         </div>
 
         <div class="status-filter" role="tablist" aria-label="Filter guest status">
@@ -33,9 +38,7 @@
           <tr>
             <th>Guest</th>
             <th>Seat</th>
-            <th>Stay Window</th>
-            <th>Arrival</th>
-            <th>Service</th>
+            <th>Checked-In</th>
             <th class="text-end">Actions</th>
           </tr>
         </thead>
@@ -48,7 +51,9 @@
                 </div>
                 <div>
                   <div class="fw-bold">{{ guest.fullName }}</div>
-                  <div class="text-luxury-faint small">{{ guest.company || guest.position || "Guest profile" }}</div>
+                  <div class="text-luxury-faint small">
+                    {{ guest.gaSoPosition || "Guest profile" }}
+                  </div>
                 </div>
               </div>
             </td>
@@ -57,37 +62,37 @@
             </td>
             <td>
               <div class="stay-window">
-                <strong>{{ formatDate(guest.checkIn) }}</strong>
-                <span class="text-luxury-faint">to {{ formatDate(guest.checkOut) }}</span>
+                <div>
+                  {{ guest.checkedInAt ? formatDateTime(guest.checkedInAt) : "Not checked in" }}
+                </div>
+                <div v-if="guest.checkInMethod" class="text-luxury-faint small">
+                  via {{ guest.checkInMethod }}
+                </div>
               </div>
-            </td>
-            <td>
-              <div class="stay-window">
-                <span :class="guest.isCheckedIn ? 'status-pill status-pill-active' : 'status-pill status-pill-pending'">
-                  <span class="timeline-dot"></span>
-                  {{ guest.isCheckedIn ? "Checked In" : "Waiting" }}
-                </span>
-                <span class="text-luxury-faint">
-                  {{ guest.isCheckedIn ? formatDateTime(guest.checkedInAt) : guest.status }}
-                </span>
-              </div>
-            </td>
-            <td>
-              <span v-if="guest.vipStatus" class="status-pill badge-luxury service-badge">
-                <i class="bi bi-stars"></i>
-                VIP
-              </span>
-              <span v-else class="text-luxury-faint">Signature</span>
             </td>
             <td>
               <div class="d-flex justify-content-end gap-2">
-                <router-link :to="`/guest/${guest.id}`" class="action-icon action-accent" aria-label="View guest details">
+                <router-link
+                  :to="`/guest/${guest.id}`"
+                  class="action-icon action-accent"
+                  aria-label="View guest details"
+                >
                   <i class="bi bi-eye"></i>
                 </router-link>
-                <button type="button" class="action-icon" aria-label="Edit guest" @click="handleEdit(guest)">
+                <button
+                  type="button"
+                  class="action-icon"
+                  aria-label="Edit guest"
+                  @click="handleEdit(guest)"
+                >
                   <i class="bi bi-pencil"></i>
                 </button>
-                <button type="button" class="action-icon action-danger" aria-label="Delete guest" @click="confirmDelete(guest)">
+                <button
+                  type="button"
+                  class="action-icon action-danger"
+                  aria-label="Delete guest"
+                  @click="confirmDelete(guest)"
+                >
                   <i class="bi bi-trash3"></i>
                 </button>
               </div>
@@ -123,9 +128,8 @@ const statusFilter = ref("all");
 
 const filterOptions = [
   { value: "all", label: "All" },
-  { value: "active", label: "Active" },
-  { value: "pending", label: "Pending" },
-  { value: "vip", label: "VIP" },
+  { value: "checkedIn", label: "Checked In" },
+  { value: "awaitingCheckIn", label: "Awaiting Check-In" },
 ];
 
 const filteredGuests = computed(() => {
@@ -135,24 +139,26 @@ const filteredGuests = computed(() => {
     const matchesQuery =
       !query ||
       guest.fullName.toLowerCase().includes(query) ||
-      (guest.company || "").toLowerCase().includes(query) ||
-      (guest.position || "").toLowerCase().includes(query) ||
+      (guest.gaSoPosition || "").toLowerCase().includes(query) ||
       (guest.seatNumber || "").toLowerCase().includes(query);
 
-    const matchesStatus =
-      statusFilter.value === "all" ||
-      guest.status === statusFilter.value ||
-      (statusFilter.value === "vip" && guest.vipStatus);
-
-    return matchesQuery && matchesStatus;
+    if (statusFilter.value === "awaitingCheckIn") {
+      return matchesQuery && guest.checkedInAt === null;
+    } else if (statusFilter.value === "checkedIn") {
+      return matchesQuery && guest.checkedInAt !== null;
+    } else {
+      return matchesQuery;
+    }
   });
 });
 
 watch([searchQuery, statusFilter], () => {
-  guestStore.fetchGuests({
-    search: searchQuery.value,
-    status: statusFilter.value,
-  }).catch(() => {});
+  guestStore
+    .fetchGuests({
+      search: searchQuery.value,
+      status: statusFilter.value,
+    })
+    .catch(() => {});
 });
 
 const formatDate = (date) =>

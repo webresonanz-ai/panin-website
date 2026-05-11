@@ -179,30 +179,16 @@ class GuestController
     {
         $data = [
             'fullName' => trim((string) ($payload['fullName'] ?? '')),
-            'company' => trim((string) ($payload['company'] ?? '')),
-            'position' => trim((string) ($payload['position'] ?? '')),
+            'gaSoPosition' => trim((string) ($payload['gaSoPosition'] ?? '')),
             'seatNumber' => trim((string) ($payload['seatNumber'] ?? '')),
-            'checkIn' => trim((string) ($payload['checkIn'] ?? '')),
-            'checkOut' => trim((string) ($payload['checkOut'] ?? '')),
-            'specialRequests' => trim((string) ($payload['specialRequests'] ?? '')),
-            'vipStatus' => (bool) ($payload['vipStatus'] ?? false),
-            'status' => trim((string) ($payload['status'] ?? $defaultStatus)),
         ];
 
         $errors = [];
 
-        foreach (['fullName', 'checkIn', 'checkOut'] as $field) {
+        foreach (['fullName'] as $field) {
             if ($data[$field] === '') {
                 $errors[$field][] = 'This field is required.';
             }
-        }
-
-        if (!in_array($data['status'], ['active', 'pending'], true)) {
-            $errors['status'][] = 'Status must be active or pending.';
-        }
-
-        if ($data['checkIn'] !== '' && $data['checkOut'] !== '' && $data['checkOut'] < $data['checkIn']) {
-            $errors['checkOut'][] = 'Check-out must be on or after check-in.';
         }
 
         if ($errors !== []) {
@@ -216,11 +202,6 @@ class GuestController
     {
         return [
             'totalGuests' => count($guests),
-            'activeGuests' => count(array_filter($guests, fn ($guest) => $guest['status'] === 'active')),
-            'pendingGuests' => count(array_filter($guests, fn ($guest) => $guest['status'] === 'pending')),
-            'vipGuests' => count(array_filter($guests, fn ($guest) => $guest['vipStatus'] === true)),
-            'checkedInGuests' => count(array_filter($guests, fn ($guest) => $guest['isCheckedIn'] === true)),
-            'awaitingCheckInGuests' => count(array_filter($guests, fn ($guest) => $guest['isCheckedIn'] === false)),
         ];
     }
 

@@ -16,18 +16,20 @@ class GuestRepository
         $params = [];
 
         if ($search) {
-            $clauses[] = '(full_name LIKE :search OR company LIKE :search OR position LIKE :search OR seat_number LIKE :search)';
+            $clauses[] = '(full_name LIKE :search OR ga_so_position LIKE :search OR seat_number LIKE :search)';
             $params['search'] = '%' . $search . '%';
         }
 
-        if ($status === 'vip') {
-            $clauses[] = 'vip_status = 1';
+        if ($status === 'awaitingCheckIn') {
+            $clauses[] = 'checked_in_at IS NULL';
+        } elseif ($status === 'checkedIn') {
+            $clauses[] = 'checked_in_at IS NOT NULL';
         } elseif ($status) {
             $clauses[] = 'status = :status';
             $params['status'] = $status;
         }
 
-        $sql = 'SELECT id, full_name, registration_number, company, position, seat_number, check_in, check_out, status, special_requests, vip_status, created_at, updated_at
+        $sql = 'SELECT id, full_name, registration_number, ga_so_position, seat_number, created_at, updated_at
                 , checked_in_at, check_in_method
                 FROM guests';
 
@@ -35,7 +37,7 @@ class GuestRepository
             $sql .= ' WHERE ' . implode(' AND ', $clauses);
         }
 
-        $sql .= ' ORDER BY check_in ASC, id DESC';
+        $sql .= ' ORDER BY full_name ASC, id DESC';
 
         $statement = $this->database->connection()->prepare($sql);
         $statement->execute($params);
@@ -46,7 +48,7 @@ class GuestRepository
     public function find(int $id): ?array
     {
         $statement = $this->database->connection()->prepare(
-            'SELECT id, full_name, registration_number, company, position, seat_number, check_in, check_out, status, special_requests, vip_status, created_at, updated_at, checked_in_at, check_in_method
+            'SELECT id, full_name, registration_number, ga_so_position, seat_number, created_at, updated_at, checked_in_at, check_in_method
              FROM guests WHERE id = :id LIMIT 1'
         );
         $statement->execute(['id' => $id]);
@@ -60,19 +62,15 @@ class GuestRepository
     {
         $connection = $this->database->connection();
         $statement = $connection->prepare(
-            'INSERT INTO guests (full_name, company, position, seat_number, check_in, check_out, status, special_requests, vip_status, created_at, updated_at)
-             VALUES (:full_name, :company, :position, :seat_number, :check_in, :check_out, :status, :special_requests, :vip_status, NOW(), NOW())'
+            'INSERT INTO guests (full_name, ga_so_position, seat_number, checked_in_at, check_in_method, created_at, updated_at)
+             VALUES (:full_name, :ga_so_position, :seat_number, :checked_in_at, :check_in_method, NOW(), NOW())'
         );
         $statement->execute([
             'full_name' => $data['fullName'],
-            'company' => $data['company'] ?: null,
-            'position' => $data['position'] ?: null,
+            'ga_so_position' => $data['gaSoPosition'] ?: null,
             'seat_number' => $data['seatNumber'] ?: null,
-            'check_in' => $data['checkIn'],
-            'check_out' => $data['checkOut'],
-            'status' => $data['status'],
-            'special_requests' => $data['specialRequests'] ?: null,
-            'vip_status' => $data['vipStatus'] ? 1 : 0,
+            'checked_in_at' => $data['checkedInAt'] ?: null,
+            'check_in_method' => $data['checkInMethod'] ?: null,
         ]);
 
         $guestId = (int) $connection->lastInsertId();
@@ -84,7 +82,7 @@ class GuestRepository
     public function findByRegistrationNumber(string $registrationNumber): ?array
     {
         $statement = $this->database->connection()->prepare(
-            'SELECT id, full_name, registration_number, company, position, seat_number, check_in, check_out, status, special_requests, vip_status, created_at, updated_at, checked_in_at, check_in_method
+            'SELECT id, full_name, registration_number, ga_so_position, seat_number, created_at, updated_at, checked_in_at, check_in_method
              FROM guests WHERE registration_number = :registration_number LIMIT 1'
         );
         $statement->execute(['registration_number' => $registrationNumber]);
@@ -99,28 +97,20 @@ class GuestRepository
         $statement = $this->database->connection()->prepare(
             'UPDATE guests
              SET full_name = :full_name,
-                 company = :company,
-                 position = :position,
+                 ga_so_position = :ga_so_position,
                  seat_number = :seat_number,
-                 check_in = :check_in,
-                 check_out = :check_out,
-                 status = :status,
-                 special_requests = :special_requests,
-                 vip_status = :vip_status,
+                 checked_in_at = :checked_in_at,
+                 check_in_method = :check_in_method,
                  updated_at = NOW()
              WHERE id = :id'
         );
         $statement->execute([
             'id' => $id,
             'full_name' => $data['fullName'],
-            'company' => $data['company'] ?: null,
-            'position' => $data['position'] ?: null,
+            'ga_so_position' => $data['gaSoPosition'] ?: null,
             'seat_number' => $data['seatNumber'] ?: null,
-            'check_in' => $data['checkIn'],
-            'check_out' => $data['checkOut'],
-            'status' => $data['status'],
-            'special_requests' => $data['specialRequests'] ?: null,
-            'vip_status' => $data['vipStatus'] ? 1 : 0,
+            'checked_in_at' => $data['checkedInAt'] ?: null,
+            'check_in_method' => $data['checkInMethod'] ?: null,
         ]);
 
         return $this->find($id);
@@ -134,8 +124,8 @@ class GuestRepository
 
         $connection = $this->database->connection();
         $statement = $connection->prepare(
-            'INSERT INTO guests (full_name, company, position, seat_number, check_in, check_out, status, special_requests, vip_status, created_at, updated_at)
-             VALUES (:full_name, :company, :position, :seat_number, :check_in, :check_out, :status, :special_requests, :vip_status, NOW(), NOW())'
+            'INSERT INTO guests (full_name, ga_so_position, seat_number, checked_in_at, check_in_method, created_at, updated_at)
+             VALUES (:full_name, :ga_so_position, :seat_number, :checked_in_at, :check_in_method, NOW(), NOW())'
         );
 
         $connection->beginTransaction();
@@ -144,14 +134,10 @@ class GuestRepository
             foreach ($rows as $row) {
                 $statement->execute([
                     'full_name' => $row['fullName'],
-                    'company' => $row['company'] ?: null,
-                    'position' => $row['position'] ?: null,
+                    'ga_so_position' => $row['gaSoPosition'] ?: null,
                     'seat_number' => $row['seatNumber'] ?: null,
-                    'check_in' => $row['checkIn'],
-                    'check_out' => $row['checkOut'],
-                    'status' => $row['status'],
-                    'special_requests' => $row['specialRequests'] ?: null,
-                    'vip_status' => $row['vipStatus'] ? 1 : 0,
+                    'checked_in_at' => $row['checkedInAt'] ?: null,
+                    'check_in_method' => $row['checkInMethod'] ?: null,
                 ]);
 
                 $this->assignRegistrationNumber((int) $connection->lastInsertId());
@@ -198,14 +184,8 @@ class GuestRepository
             'id' => (int) $guest['id'],
             'fullName' => $guest['full_name'],
             'registrationNumber' => $guest['registration_number'],
-            'company' => $guest['company'],
-            'position' => $guest['position'],
+            'gaSoPosition' => $guest['ga_so_position'],
             'seatNumber' => $guest['seat_number'],
-            'checkIn' => $guest['check_in'],
-            'checkOut' => $guest['check_out'],
-            'status' => $guest['status'],
-            'specialRequests' => $guest['special_requests'],
-            'vipStatus' => (bool) $guest['vip_status'],
             'checkedInAt' => $guest['checked_in_at'],
             'checkInMethod' => $guest['check_in_method'],
             'isCheckedIn' => $guest['checked_in_at'] !== null,

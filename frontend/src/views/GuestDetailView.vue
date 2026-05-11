@@ -6,7 +6,7 @@
           <div>
             <div class="eyebrow">Guest Dossier</div>
             <h1 class="hero-title">{{ guest.fullName }}</h1>
-            <p class="hero-subtitle">{{ guest.company || "Independent Guest" }} | {{ guest.position || "Profile pending" }}</p>
+            <p class="hero-subtitle">{{ guest.gaSoPosition || "Independent Guest" }}</p>
           </div>
 
           <div class="d-flex flex-wrap gap-2">
@@ -30,7 +30,11 @@
               <i class="bi bi-shield-lock"></i>
               Login to Edit
             </router-link>
-            <button v-if="authStore.isAuthenticated" @click="handleDelete" class="btn luxury-btn luxury-btn-secondary">
+            <button
+              v-if="authStore.isAuthenticated"
+              @click="handleDelete"
+              class="btn luxury-btn luxury-btn-secondary"
+            >
               <i class="bi bi-trash3"></i>
               Delete
             </button>
@@ -63,7 +67,9 @@
                   <article class="info-row h-100 align-items-start">
                     <div>
                       <div class="text-luxury-faint small text-uppercase">Seat Number</div>
-                      <div class="fw-bold text-white mt-1">{{ guest.seatNumber || "Unassigned" }}</div>
+                      <div class="fw-bold text-white mt-1">
+                        {{ guest.seatNumber || "Unassigned" }}
+                      </div>
                     </div>
                   </article>
                 </div>
@@ -72,7 +78,9 @@
                     <div>
                       <div class="text-luxury-faint small text-uppercase">Stay Window</div>
                       <div class="fw-bold text-white mt-1">{{ formatDate(guest.checkIn) }}</div>
-                      <div class="text-luxury-soft small">through {{ formatDate(guest.checkOut) }}</div>
+                      <div class="text-luxury-soft small">
+                        through {{ formatDate(guest.checkOut) }}
+                      </div>
                     </div>
                   </article>
                 </div>
@@ -80,8 +88,12 @@
                   <article class="info-row h-100 align-items-start">
                     <div>
                       <div class="text-luxury-faint small text-uppercase">Guest Profile</div>
-                      <div class="fw-bold text-white mt-1">{{ guest.company || "Independent Guest" }}</div>
-                      <div class="text-luxury-soft small">{{ guest.position || "Position not listed" }}</div>
+                      <div class="fw-bold text-white mt-1">
+                        {{ guest.company || "Independent Guest" }}
+                      </div>
+                      <div class="text-luxury-soft small">
+                        {{ guest.position || "Position not listed" }}
+                      </div>
                     </div>
                   </article>
                 </div>
@@ -92,7 +104,13 @@
                       <div class="fw-bold text-white mt-1">
                         {{ guest.vipStatus ? "Concierge Priority" : "Signature Stay" }}
                       </div>
-                      <div class="text-luxury-soft small">{{ guest.isCheckedIn ? `Checked in ${formatDateTime(guest.checkedInAt)}` : "Awaiting QR check-in" }}</div>
+                      <div class="text-luxury-soft small">
+                        {{
+                          guest.isCheckedIn
+                            ? `Checked in ${formatDateTime(guest.checkedInAt)}`
+                            : "Awaiting QR check-in"
+                        }}
+                      </div>
                     </div>
                   </article>
                 </div>
@@ -122,7 +140,11 @@
                 <div>
                   <div class="fw-bold text-white">Arrival state</div>
                   <div class="text-luxury-faint small">
-                    {{ guest.isCheckedIn ? "Guest has already been admitted through QR check-in." : "Guest has not been scanned at the arrival desk yet." }}
+                    {{
+                      guest.isCheckedIn
+                        ? "Guest has already been admitted through QR check-in."
+                        : "Guest has not been scanned at the arrival desk yet."
+                    }}
                   </div>
                 </div>
               </article>
@@ -131,7 +153,11 @@
                 <div>
                   <div class="fw-bold text-white">Service tier</div>
                   <div class="text-luxury-faint small">
-                    {{ guest.vipStatus ? "VIP handling is enabled for a higher-touch journey." : "Standard signature hospitality applies." }}
+                    {{
+                      guest.vipStatus
+                        ? "VIP handling is enabled for a higher-touch journey."
+                        : "Standard signature hospitality applies."
+                    }}
                   </div>
                 </div>
               </article>
@@ -146,7 +172,9 @@
         <i class="bi bi-exclamation-diamond"></i>
       </div>
       <h2 class="section-title mb-2">Guest Not Found</h2>
-      <p class="section-copy mb-4">The dossier you requested is no longer available in the manifest.</p>
+      <p class="section-copy mb-4">
+        The dossier you requested is no longer available in the manifest.
+      </p>
       <router-link to="/guests" class="btn luxury-btn">Return to Guest List</router-link>
     </div>
   </div>
