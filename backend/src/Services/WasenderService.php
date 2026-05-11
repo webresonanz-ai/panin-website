@@ -26,6 +26,7 @@ class WasenderService
             'to' => $to,
             'documentUrl' => $documentUrl,
             'fileName' => $fileName,
+            'text' => 'Please find the attached document.',
         ];
 
         $response = $this->makeRequest($payload);
