@@ -75,9 +75,9 @@ class ReservationUtil
 
         $qrImage = $this->buildQrImage($guest);
         if ($qrImage !== null) {
-            $qrSize = (int) round(min($width, $height) * 0.16);
+            $qrSize = (int) round(min($width, $height) * 0.21);
             $qrX = (int) round(($width - $qrSize) / 2);
-            $qrY = (int) round($height * 0.767);
+            $qrY = (int) round($height * 0.76);
             imagecopyresampled(
                 $image,
                 $qrImage,
@@ -92,24 +92,24 @@ class ReservationUtil
             );
         }
 
-        $this->drawCenteredText($image, $fontPath, $fullName, (int) round($width * 0.028), (int) round($height * 0.46), $darkText);
+        $this->drawCenteredText($image, $fontPath, $fullName, (int) round($width * 0.028), (int) round($height * 0.52), $darkText);
 
         if ($company !== '') {
-            $this->drawCenteredText($image, $fontPath, $company, (int) round($width * 0.025), (int) round($height * 0.58), $mutedText);
+            $this->drawCenteredText($image, $fontPath, $company, (int) round($width * 0.025), (int) round($height * 0.60), $mutedText);
         }
 
-        if ($position !== '') {
-            $this->drawCenteredText($image, $fontPath, $position, (int) round($width * 0.025), (int) round($height * 0.68), $mutedText);
-        }
+        // if ($position !== '') {
+        //     $this->drawCenteredText($image, $fontPath, $position, (int) round($width * 0.025), (int) round($height * 0.68), $mutedText);
+        // }
 
-        // $this->drawCenteredText(
-        //     $image,
-        //     $fontPath,
-        //     'Seat ' . ($seatNumber !== '' ? $seatNumber : 'Unassigned'),
-        //     (int) round($width * 0.02),
-        //     (int) round($height * 0.59),
-        //     $darkText
-        // );
+        $this->drawCenteredText(
+            $image,
+            $fontPath,
+            'Seat ' . ($seatNumber !== '' ? $seatNumber : 'Unassigned'),
+            (int) round($width * 0.02),
+            (int) round($height * 0.69),
+            $darkText
+        );
 
         $tempFile = tempnam(sys_get_temp_dir(), 'guest-ticket-');
         if ($tempFile === false) {
@@ -155,9 +155,9 @@ class ReservationUtil
             $box = imagettfbbox($fontSize, 0, $fontPath, $text);
 
             if (is_array($box)) {
-                $textWidth = (int) abs($box[2] - $box[0]);
-                $x = (int) round((imagesx($image) - $textWidth) / 2);
-                imagettftext($image, $fontSize, 0, $x, $baselineY, $color, $fontPath, $text);
+                 $textWidth = (int) abs($box[2] - $box[0]);
+                 $x = (int) round((imagesx($image) - $textWidth) / 2);
+                 imagettftext($image, $fontSize, 0, $x, $baselineY, $color, $fontPath, $text);
                 return;
             }
         }
