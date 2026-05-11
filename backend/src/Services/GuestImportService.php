@@ -6,7 +6,7 @@ use App\Core\ApiException;
 
 class GuestImportService
 {
-    private const REQUIRED_COLUMNS = ['full_name', 'company', 'position', 'seat_number'];
+    private const REQUIRED_COLUMNS = ['full_name', 'ga_so_position', 'seat_number', 'phone_number'];
 
     public function parseUploadedFile(array $file): array
     {
@@ -238,14 +238,9 @@ class GuestImportService
 
         return [
             'fullName' => $row['full_name'],
-            'company' => $row['company'] ?? '',
-            'position' => $row['position'] ?? '',
+            'gaSoPosition' => $row['ga_so_position'] ?? '',
             'seatNumber' => $seatNumber,
-            'checkIn' => date('Y-m-d'),
-            'checkOut' => date('Y-m-d'),
-            'specialRequests' => '',
-            'vipStatus' => false,
-            'status' => 'active',
+            'phoneNumber' => $row['phone_number'] ?? '',
         ];
     }
 

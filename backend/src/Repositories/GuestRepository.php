@@ -29,7 +29,7 @@ class GuestRepository
             $params['status'] = $status;
         }
 
-        $sql = 'SELECT id, full_name, registration_number, ga_so_position, seat_number, created_at, updated_at
+        $sql = 'SELECT id, full_name, registration_number, ga_so_position, seat_number, phone_number, created_at, updated_at
                 , checked_in_at, check_in_method
                 FROM guests';
 
@@ -48,7 +48,7 @@ class GuestRepository
     public function find(int $id): ?array
     {
         $statement = $this->database->connection()->prepare(
-            'SELECT id, full_name, registration_number, ga_so_position, seat_number, created_at, updated_at, checked_in_at, check_in_method
+            'SELECT id, full_name, registration_number, ga_so_position, seat_number, phone_number, created_at, updated_at, checked_in_at, check_in_method
              FROM guests WHERE id = :id LIMIT 1'
         );
         $statement->execute(['id' => $id]);
@@ -62,15 +62,14 @@ class GuestRepository
     {
         $connection = $this->database->connection();
         $statement = $connection->prepare(
-            'INSERT INTO guests (full_name, ga_so_position, seat_number, checked_in_at, check_in_method, created_at, updated_at)
-             VALUES (:full_name, :ga_so_position, :seat_number, :checked_in_at, :check_in_method, NOW(), NOW())'
+            'INSERT INTO guests (full_name, ga_so_position, seat_number, phone_number, created_at, updated_at)
+             VALUES (:full_name, :ga_so_position, :seat_number, :phone_number, NOW(), NOW())'
         );
         $statement->execute([
             'full_name' => $data['fullName'],
             'ga_so_position' => $data['gaSoPosition'] ?: null,
             'seat_number' => $data['seatNumber'] ?: null,
-            'checked_in_at' => $data['checkedInAt'] ?: null,
-            'check_in_method' => $data['checkInMethod'] ?: null,
+            'phone_number' => $data['phoneNumber'] ?: null,
         ]);
 
         $guestId = (int) $connection->lastInsertId();
@@ -82,7 +81,7 @@ class GuestRepository
     public function findByRegistrationNumber(string $registrationNumber): ?array
     {
         $statement = $this->database->connection()->prepare(
-            'SELECT id, full_name, registration_number, ga_so_position, seat_number, created_at, updated_at, checked_in_at, check_in_method
+            'SELECT id, full_name, registration_number, ga_so_position, seat_number, phone_number, created_at, updated_at, checked_in_at, check_in_method
              FROM guests WHERE registration_number = :registration_number LIMIT 1'
         );
         $statement->execute(['registration_number' => $registrationNumber]);
@@ -124,8 +123,8 @@ class GuestRepository
 
         $connection = $this->database->connection();
         $statement = $connection->prepare(
-            'INSERT INTO guests (full_name, ga_so_position, seat_number, checked_in_at, check_in_method, created_at, updated_at)
-             VALUES (:full_name, :ga_so_position, :seat_number, :checked_in_at, :check_in_method, NOW(), NOW())'
+            'INSERT INTO guests (full_name, ga_so_position, seat_number, phone_number, created_at, updated_at)
+             VALUES (:full_name, :ga_so_position, :seat_number, :phone_number, NOW(), NOW())'
         );
 
         $connection->beginTransaction();
@@ -136,8 +135,7 @@ class GuestRepository
                     'full_name' => $row['fullName'],
                     'ga_so_position' => $row['gaSoPosition'] ?: null,
                     'seat_number' => $row['seatNumber'] ?: null,
-                    'checked_in_at' => $row['checkedInAt'] ?: null,
-                    'check_in_method' => $row['checkInMethod'] ?: null,
+                    'phone_number' => $row['phoneNumber'] ?: null,
                 ]);
 
                 $this->assignRegistrationNumber((int) $connection->lastInsertId());

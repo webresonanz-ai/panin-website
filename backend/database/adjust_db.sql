@@ -17,3 +17,5 @@ ALTER TABLE guests DROP COLUMN special_requests;
 ALTER TABLE guests DROP COLUMN vip_status;
 ALTER TABLE guests DROP COLUMN status;
 ALTER TABLE guests ADD COLUMN phone_number VARCHAR(32) NULL AFTER seat_number;
+ALTER TABLE guests
+ALTER COLUMN registration_number SET DEFAULT NULL;
