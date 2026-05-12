@@ -48,16 +48,16 @@ const route = useRoute();
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(6, 16, 30, 0.95);
+  background: rgba(6, 12, 28, 0.95);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #68a7ff, #d94862);
-  border: 2px solid rgba(6, 16, 30, 0.95);
+  background: linear-gradient(180deg, #ff7e31, #ff4a63 40%, #35d7ff 100%);
+  border: 2px solid rgba(6, 12, 28, 0.95);
   border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #91c2ff, #ea6b83);
+  background: linear-gradient(180deg, #ff9847, #ff6288 44%, #6ce8ff 100%);
 }
 </style>

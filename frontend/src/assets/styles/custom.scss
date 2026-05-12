@@ -1,7 +1,21 @@
 @use "sass:color";
 @use "@/assets/styles/variables" as *;
 
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap");
+@font-face {
+  font-family: "Cinzel";
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url("../fonts/Cinzel/Cinzel-VariableFont_wght.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Montserrat";
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url("../fonts/Montserrat/Montserrat-VariableFont_wght.ttf") format("truetype");
+}
 
 :root {
   color-scheme: dark;
@@ -15,13 +29,18 @@
   --luxury-ink: #{$luxury-ink};
   --luxury-slate: #{$luxury-slate};
   --luxury-white: #{$luxury-white};
-  --surface: rgba(11, 26, 51, 0.74);
-  --surface-strong: rgba(8, 19, 39, 0.88);
-  --surface-soft: rgba(255, 255, 255, 0.06);
-  --surface-border: rgba(153, 185, 255, 0.16);
-  --surface-border-strong: rgba(217, 72, 98, 0.22);
-  --shadow-soft: 0 24px 60px rgba(3, 12, 27, 0.24);
-  --shadow-strong: 0 32px 90px rgba(4, 17, 38, 0.36);
+  --aurora-red: #ff4a63;
+  --aurora-orange: #ff8e2b;
+  --aurora-pink: #ff2b8f;
+  --aurora-cyan: #4cf2ff;
+  --aurora-blue: #1878ff;
+  --surface: rgba(7, 15, 36, 0.72);
+  --surface-strong: rgba(5, 11, 31, 0.86);
+  --surface-soft: rgba(255, 255, 255, 0.07);
+  --surface-border: rgba(110, 180, 255, 0.22);
+  --surface-border-strong: rgba(255, 82, 123, 0.28);
+  --shadow-soft: 0 28px 65px rgba(2, 8, 28, 0.4);
+  --shadow-strong: 0 40px 110px rgba(0, 7, 30, 0.62);
   --page-padding: clamp(1.25rem, 2vw, 2.25rem);
 }
 
@@ -31,24 +50,39 @@ html {
 
 body {
   background:
-    linear-gradient(135deg, rgba(8, 26, 51, 0.98), rgba(10, 22, 46, 0.94)),
-    linear-gradient(120deg, rgba(104, 167, 255, 0.12), transparent 34%),
-    linear-gradient(320deg, rgba(217, 72, 98, 0.18), transparent 32%);
+    linear-gradient(180deg, rgba(3, 7, 24, 0.14), rgba(4, 9, 28, 0.26)),
+    radial-gradient(circle at 50% 70%, rgba(255, 255, 255, 0.55), rgba(120, 244, 255, 0.18) 8%, transparent 18%),
+    radial-gradient(circle at 22% 58%, rgba(255, 81, 92, 0.24), transparent 24%),
+    radial-gradient(circle at 76% 56%, rgba(38, 150, 255, 0.22), transparent 24%),
+    radial-gradient(circle at 8% 82%, rgba(255, 142, 43, 0.22), transparent 18%),
+    radial-gradient(circle at 92% 80%, rgba(42, 216, 255, 0.18), transparent 18%),
+    linear-gradient(180deg, rgba(4, 7, 24, 0.22) 0%, rgba(7, 13, 38, 0.18) 42%, rgba(9, 20, 52, 0.26) 100%),
+    linear-gradient(90deg, rgba(255, 84, 61, 0.1) 0%, rgba(255, 62, 138, 0.06) 28%, rgba(255, 255, 255, 0.02) 50%, rgba(84, 214, 255, 0.08) 74%, rgba(24, 120, 255, 0.1) 100%),
+    url("../images/KV_A4_Panin_2026.png");
+  background-attachment: fixed;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
   color: $luxury-ivory;
-  font-family: "Manrope", "Segoe UI", sans-serif;
+  font-family: $font-family-base;
   min-height: 100vh;
   overflow-x: hidden;
 }
 
 body::before {
   background:
-    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
-    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-  background-size: 120px 120px;
+    radial-gradient(circle at 8% 12%, rgba(255, 255, 255, 0.95) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 18% 32%, rgba(201, 231, 255, 0.8) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 34% 22%, rgba(255, 220, 244, 0.85) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 48% 14%, rgba(255, 255, 255, 0.95) 0 1.4px, transparent 1.8px),
+    radial-gradient(circle at 62% 30%, rgba(209, 242, 255, 0.78) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 78% 18%, rgba(255, 255, 255, 0.92) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 88% 26%, rgba(208, 229, 255, 0.7) 0 1px, transparent 1.5px);
+  background-size: cover;
   content: "";
   inset: 0;
-  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.45), transparent 85%);
-  opacity: 0.18;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), transparent 68%);
+  opacity: 0.28;
   pointer-events: none;
   position: fixed;
   z-index: 0;
@@ -56,14 +90,11 @@ body::before {
 
 body::after {
   animation: scanSweep 18s linear infinite;
-  background: linear-gradient(
-    115deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.02) 42%,
-    rgba(255, 255, 255, 0.08) 50%,
-    rgba(255, 255, 255, 0.02) 58%,
-    transparent 100%
-  );
+  background:
+    linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.04) 48%, transparent 100%),
+    linear-gradient(180deg, transparent 0%, rgba(255, 120, 72, 0.06) 58%, rgba(73, 203, 255, 0.08) 100%);
+  filter: blur(2px);
+  opacity: 0.45;
   content: "";
   inset: 0;
   pointer-events: none;
@@ -94,10 +125,12 @@ a {
 
 .page-hero {
   background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)),
-    linear-gradient(135deg, rgba(104, 167, 255, 0.18), transparent 42%),
-    linear-gradient(315deg, rgba(217, 72, 98, 0.16), transparent 34%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+    linear-gradient(160deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.02)),
+    radial-gradient(circle at 50% 110%, rgba(255, 255, 255, 0.3), transparent 32%),
+    linear-gradient(130deg, rgba(255, 87, 71, 0.16), transparent 34%),
+    linear-gradient(225deg, rgba(255, 54, 143, 0.12), transparent 42%),
+    linear-gradient(315deg, rgba(65, 219, 255, 0.18), transparent 36%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 28px;
   box-shadow: var(--shadow-strong);
   overflow: hidden;
@@ -132,7 +165,7 @@ a {
 }
 
 .eyebrow::before {
-  background: linear-gradient(90deg, $luxury-sky, $luxury-crimson);
+  background: linear-gradient(90deg, var(--aurora-orange), $luxury-crimson, $luxury-sky);
   border-radius: 999px;
   content: "";
   display: inline-block;
@@ -143,7 +176,7 @@ a {
 .hero-title,
 .section-title,
 .luxury-gradient-text {
-  background: linear-gradient(135deg, $luxury-white 0%, $luxury-mist 35%, #ffdde3 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #ffe6ed 26%, #baf2ff 62%, #dce8ff 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -151,13 +184,13 @@ a {
 
 .hero-title,
 .section-title {
-  font-family: "Cormorant Garamond", Georgia, serif;
+  font-family: $font-family-base;
   font-weight: 600;
   letter-spacing: 0;
 }
 
 .hero-title {
-  font-size: clamp(2.6rem, 5vw, 4.8rem);
+  font-size: clamp(2.6rem, 5vw, 3.8rem);
   line-height: 0.94;
   margin: 0;
 }
@@ -203,9 +236,9 @@ a {
 .luxury-card::after {
   background: linear-gradient(
     135deg,
-    rgba(104, 167, 255, 0.2),
-    transparent 35%,
-    rgba(217, 72, 98, 0.18)
+    rgba(255, 74, 99, 0.16),
+    rgba(255, 255, 255, 0) 38%,
+    rgba(61, 224, 255, 0.18)
   );
   border-radius: inherit;
   content: "";
@@ -228,7 +261,9 @@ a {
 }
 
 .glass-effect {
-  background: rgba(7, 18, 36, 0.74);
+  background:
+    linear-gradient(180deg, rgba(9, 18, 44, 0.82), rgba(5, 11, 30, 0.72)),
+    radial-gradient(circle at top right, rgba(56, 191, 255, 0.12), transparent 38%);
   backdrop-filter: blur(18px);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
@@ -239,10 +274,10 @@ a {
 
 .luxury-btn {
   align-items: center;
-  background: linear-gradient(135deg, $luxury-royal, color.adjust($luxury-royal, $lightness: 9%));
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 999px;
-  box-shadow: 0 14px 36px rgba(10, 48, 96, 0.34);
+  box-shadow: 0 14px 30px rgba(3, 8, 24, 0.24);
   color: $luxury-white;
   display: inline-flex;
   font-size: 0.92rem;
@@ -260,9 +295,9 @@ a {
 }
 
 .luxury-btn:hover {
-  background: linear-gradient(135deg, color.adjust($luxury-royal, $lightness: 8%), $luxury-sky);
-  border-color: rgba(255, 255, 255, 0.22);
-  box-shadow: 0 18px 44px rgba(11, 55, 110, 0.42);
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.24);
+  box-shadow: 0 18px 36px rgba(3, 8, 24, 0.3);
   color: $luxury-white;
   transform: translateY(-2px);
 }
@@ -272,25 +307,29 @@ a {
 }
 
 .luxury-btn-secondary {
-  background: linear-gradient(135deg, rgba(217, 72, 98, 0.9), rgba(143, 23, 48, 0.92));
-  box-shadow: 0 14px 36px rgba(99, 18, 36, 0.34);
+  background: $luxury-white;
+  border-color: rgba(255, 255, 255, 0.28);
+  box-shadow: 0 14px 30px rgba(3, 8, 24, 0.22);
+  color: $luxury-ink;
 }
 
 .luxury-btn-secondary:hover {
-  background: linear-gradient(135deg, color.adjust($luxury-crimson, $lightness: 4%), $luxury-ruby);
-  box-shadow: 0 18px 44px rgba(117, 22, 44, 0.44);
+  background: color.adjust($luxury-white, $lightness: -6%);
+  border-color: rgba(255, 255, 255, 0.34);
+  box-shadow: 0 18px 34px rgba(3, 8, 24, 0.28);
+  color: $luxury-ink;
 }
 
 .luxury-btn-ghost {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 999px;
   color: $luxury-white;
   font-weight: 700;
 }
 
 .luxury-btn-ghost:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
   color: $luxury-white;
 }
 
@@ -309,8 +348,8 @@ a {
 }
 
 .badge-luxury {
-  background: rgba(104, 167, 255, 0.12);
-  border: 1px solid rgba(104, 167, 255, 0.26);
+  background: rgba(76, 242, 255, 0.12);
+  border: 1px solid rgba(76, 242, 255, 0.28);
   color: $luxury-mist;
 }
 
@@ -342,7 +381,7 @@ a {
 }
 
 .metric-chip::before {
-  background: linear-gradient(135deg, rgba(104, 167, 255, 0.24), transparent 65%);
+  background: linear-gradient(135deg, rgba(255, 86, 83, 0.16), rgba(76, 242, 255, 0.2) 58%, transparent 80%);
   content: "";
   inset: 0;
   position: absolute;
@@ -403,7 +442,7 @@ a {
   align-items: center;
   background:
     linear-gradient(135deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.03)),
-    linear-gradient(135deg, $luxury-sky, $luxury-crimson);
+    linear-gradient(135deg, $luxury-ruby, $luxury-crimson 48%, $luxury-sky);
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 50%;
   box-shadow: 0 20px 35px rgba(14, 23, 40, 0.25);
@@ -465,8 +504,8 @@ a {
 .form-control.luxury-input:focus,
 .select-luxury:focus {
   background: rgba(255, 255, 255, 0.07);
-  border-color: rgba(104, 167, 255, 0.5);
-  box-shadow: 0 0 0 0.25rem rgba(104, 167, 255, 0.14);
+  border-color: rgba(76, 242, 255, 0.5);
+  box-shadow: 0 0 0 0.25rem rgba(76, 242, 255, 0.16);
   color: $luxury-white;
 }
 
@@ -487,8 +526,9 @@ textarea.luxury-input::placeholder {
 
 .table-shell {
   background:
-    linear-gradient(180deg, rgba(5, 14, 28, 0.96), rgba(8, 18, 36, 0.94)), rgba(6, 15, 29, 0.96);
-  border-color: rgba(137, 173, 255, 0.16);
+    linear-gradient(180deg, rgba(5, 13, 32, 0.96), rgba(7, 16, 38, 0.94)),
+    radial-gradient(circle at bottom center, rgba(255, 255, 255, 0.08), transparent 35%);
+  border-color: rgba(114, 187, 255, 0.18);
   overflow: hidden;
 }
 
@@ -522,7 +562,7 @@ textarea.luxury-input::placeholder {
 }
 
 .table-luxury tbody tr:hover {
-  background: rgba(104, 167, 255, 0.05);
+  background: rgba(76, 242, 255, 0.06);
 }
 
 .action-icon {
@@ -549,13 +589,13 @@ textarea.luxury-input::placeholder {
 }
 
 .action-icon.action-danger:hover {
-  background: rgba(217, 72, 98, 0.14);
-  border-color: rgba(217, 72, 98, 0.28);
+  background: rgba(255, 74, 99, 0.16);
+  border-color: rgba(255, 74, 99, 0.3);
 }
 
 .action-icon.action-accent:hover {
-  background: rgba(104, 167, 255, 0.14);
-  border-color: rgba(104, 167, 255, 0.28);
+  background: rgba(76, 242, 255, 0.16);
+  border-color: rgba(76, 242, 255, 0.3);
 }
 
 .subtle-note {
@@ -564,7 +604,7 @@ textarea.luxury-input::placeholder {
 }
 
 .timeline-dot {
-  background: linear-gradient(135deg, $luxury-sky, $luxury-crimson);
+  background: linear-gradient(135deg, var(--aurora-orange), $luxury-crimson 45%, $luxury-sky);
   border-radius: 999px;
   display: inline-block;
   height: 10px;

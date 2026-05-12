@@ -87,11 +87,14 @@ const handleLogout = async () => {
 
 .app-nav__shell {
   align-items: center;
-  background: rgba(7, 18, 36, 0.78);
+  background:
+    linear-gradient(180deg, rgba(7, 15, 37, 0.84), rgba(5, 10, 29, 0.8)),
+    radial-gradient(circle at 18% 0%, rgba(255, 88, 82, 0.16), transparent 30%),
+    radial-gradient(circle at 82% 0%, rgba(57, 214, 255, 0.16), transparent 32%);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 24px;
-  box-shadow: 0 18px 40px rgba(2, 9, 20, 0.28);
+  box-shadow: 0 22px 48px rgba(1, 8, 25, 0.42);
   display: flex;
   gap: 1rem;
   justify-content: space-between;
@@ -108,8 +111,8 @@ const handleLogout = async () => {
 
 .app-brand__crest {
   align-items: center;
-  background: linear-gradient(135deg, rgba(104, 167, 255, 0.18), rgba(217, 72, 98, 0.18));
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(135deg, rgba(255, 124, 53, 0.22), rgba(255, 74, 99, 0.2), rgba(57, 214, 255, 0.2));
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 18px;
   color: var(--luxury-white);
   display: inline-flex;
@@ -133,7 +136,6 @@ const handleLogout = async () => {
 }
 
 .app-brand__name {
-  font-family: "Cormorant Garamond", Georgia, serif;
   font-size: 1.8rem;
   line-height: 1;
 }
@@ -164,8 +166,8 @@ const handleLogout = async () => {
 
 .app-link:hover,
 .app-link.router-link-exact-active {
-  background: linear-gradient(135deg, rgba(104, 167, 255, 0.12), rgba(217, 72, 98, 0.12));
-  border-color: rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, rgba(255, 85, 73, 0.12), rgba(255, 74, 99, 0.1), rgba(57, 214, 255, 0.12));
+  border-color: rgba(255, 255, 255, 0.14);
   color: var(--luxury-white) !important;
   transform: translateY(-1px);
 }

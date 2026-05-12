@@ -101,14 +101,14 @@ import { onMounted, onUnmounted, ref } from "vue";
 import { useGuestStore } from "@/stores/guestStore";
 
 const confettiPieces = [
-  { id: 1, left: 10, delay: 0, duration: 2.2, rotate: 15, color: "#7deab0" },
-  { id: 2, left: 20, delay: 0.1, duration: 2.4, rotate: -20, color: "#68a7ff" },
-  { id: 3, left: 30, delay: 0.2, duration: 2.1, rotate: 25, color: "#f4d58d" },
+  { id: 1, left: 10, delay: 0, duration: 2.2, rotate: 15, color: "#4cf2ff" },
+  { id: 2, left: 20, delay: 0.1, duration: 2.4, rotate: -20, color: "#1878ff" },
+  { id: 3, left: 30, delay: 0.2, duration: 2.1, rotate: 25, color: "#ff8e2b" },
   { id: 4, left: 40, delay: 0.05, duration: 2.3, rotate: -10, color: "#ffffff" },
-  { id: 5, left: 50, delay: 0.15, duration: 2.5, rotate: 30, color: "#d94862" },
-  { id: 6, left: 60, delay: 0.25, duration: 2.0, rotate: -25, color: "#7deab0" },
-  { id: 7, left: 70, delay: 0.08, duration: 2.6, rotate: 18, color: "#68a7ff" },
-  { id: 8, left: 80, delay: 0.18, duration: 2.2, rotate: -15, color: "#f4d58d" },
+  { id: 5, left: 50, delay: 0.15, duration: 2.5, rotate: 30, color: "#ff4a63" },
+  { id: 6, left: 60, delay: 0.25, duration: 2.0, rotate: -25, color: "#ff2b8f" },
+  { id: 7, left: 70, delay: 0.08, duration: 2.6, rotate: 18, color: "#35d7ff" },
+  { id: 8, left: 80, delay: 0.18, duration: 2.2, rotate: -15, color: "#ff8e2b" },
   { id: 9, left: 90, delay: 0.28, duration: 2.4, rotate: 22, color: "#ffffff" },
 ];
 
@@ -329,8 +329,10 @@ onUnmounted(() => {
 .scanner-viewport-wrapper {
   aspect-ratio: 1 / 1;
   background:
-    radial-gradient(circle at top, rgba(104, 167, 255, 0.18), transparent 42%),
-    linear-gradient(180deg, rgba(4, 14, 29, 0.96), rgba(5, 11, 22, 0.98));
+    radial-gradient(circle at 50% 100%, rgba(255, 255, 255, 0.16), transparent 28%),
+    radial-gradient(circle at 20% 18%, rgba(255, 74, 99, 0.24), transparent 34%),
+    radial-gradient(circle at 80% 18%, rgba(57, 214, 255, 0.22), transparent 34%),
+    linear-gradient(180deg, rgba(4, 12, 30, 0.96), rgba(5, 10, 24, 0.98));
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 24px;
   overflow: hidden;
@@ -367,8 +369,8 @@ onUnmounted(() => {
 
 .scanner-frame--success {
   box-shadow:
-    0 0 0 1px rgba(125, 234, 176, 0.42),
-    0 0 14px rgba(91, 221, 152, 0.28);
+    0 0 0 1px rgba(76, 242, 255, 0.45),
+    0 0 18px rgba(76, 242, 255, 0.32);
   transform: scale(1.01);
 }
 
@@ -386,8 +388,8 @@ onUnmounted(() => {
 }
 
 .scanner-line--success {
-  background: linear-gradient(90deg, transparent, rgba(101, 232, 154, 0.92), transparent);
-  box-shadow: 0 0 24px rgba(101, 232, 154, 0.85);
+  background: linear-gradient(90deg, transparent, rgba(76, 242, 255, 0.94), transparent);
+  box-shadow: 0 0 24px rgba(76, 242, 255, 0.85);
   height: 4px;
 }
 
@@ -431,7 +433,7 @@ onUnmounted(() => {
 .scanner-success-popup {
   align-items: center;
   backdrop-filter: blur(12px);
-  background: rgba(3, 9, 17, 0.72);
+  background: rgba(3, 7, 19, 0.78);
   display: flex;
   inset: 0;
   justify-content: center;
@@ -451,8 +453,9 @@ onUnmounted(() => {
 
 .success-popup-glow {
   background:
-    radial-gradient(circle at top right, rgba(104, 167, 255, 0.22), transparent 36%),
-    radial-gradient(circle at bottom left, rgba(109, 228, 159, 0.18), transparent 32%);
+    radial-gradient(circle at top left, rgba(255, 74, 99, 0.18), transparent 34%),
+    radial-gradient(circle at top right, rgba(57, 214, 255, 0.22), transparent 36%),
+    radial-gradient(circle at bottom center, rgba(255, 255, 255, 0.12), transparent 30%);
   inset: 0;
   pointer-events: none;
   position: absolute;
@@ -489,8 +492,8 @@ onUnmounted(() => {
 
 .success-icon {
   font-size: 4rem;
-  color: #65e89a;
-  filter: drop-shadow(0 0 20px rgba(101, 232, 154, 0.5));
+  color: #4cf2ff;
+  filter: drop-shadow(0 0 20px rgba(76, 242, 255, 0.5));
   animation: iconPop 0.6s ease-out;
 }
 
@@ -516,7 +519,7 @@ onUnmounted(() => {
 }
 
 .success-subtitle {
-  color: rgba(125, 234, 176, 0.88);
+  color: rgba(76, 242, 255, 0.9);
   font-size: 1rem;
   margin-bottom: 1.5rem;
 }
@@ -533,7 +536,7 @@ onUnmounted(() => {
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(104, 167, 255, 0.3), rgba(109, 228, 159, 0.3));
+  background: linear-gradient(135deg, rgba(255, 74, 99, 0.24), rgba(57, 214, 255, 0.28));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -557,7 +560,7 @@ onUnmounted(() => {
 }
 
 .guest-seat {
-  color: rgba(125, 234, 176, 0.9);
+  color: rgba(76, 242, 255, 0.92);
   font-size: 0.8rem;
   font-weight: 600;
   margin-top: 0.35rem;
