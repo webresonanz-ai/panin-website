@@ -161,6 +161,14 @@ class GuestRepository
         $statement->execute(['id' => $id]);
     }
 
+    public function saveWaSentTime(int $id): void
+    {
+        $statement = $this->database->connection()->prepare(
+            'UPDATE guests SET wa_sent_time = NOW() WHERE id = :id'
+        );
+        $statement->execute(['id' => $id]);
+    }
+
     public function markCheckedIn(int $id, string $method = 'qr_scan'): ?array
     {
         $statement = $this->database->connection()->prepare(

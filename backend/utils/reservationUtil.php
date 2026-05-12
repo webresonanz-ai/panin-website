@@ -63,20 +63,31 @@ class ReservationUtil
 
         $width = imagesx($image);
         $height = imagesy($image);
+        $yPositionName = (int) round($height * 0.30);
+        $yGap = 60;
         $fontPath = $this->resolveFontPath();
 
-        $darkText = imagecolorallocate($image, 31, 35, 45);
         $goldenText = imagecolorallocate($image, 212, 175, 55);
 
         $fullName = $this->requiredValue($guest, 'fullName');
         $gaSoPosition = trim((string) ($guest['gaSoPosition'] ?? ''));
         $seatNumber = trim((string) ($guest['seatNumber'] ?? ''));
 
+        $boldFontPath = dirname(__DIR__) . '/templates/fonts/Cinzel/static/Cinzel-Bold.ttf';
+        $this->drawCenteredText($image, $boldFontPath, $fullName, (int) round($width * 0.04), $yPositionName, $goldenText);
+
+        if ($gaSoPosition !== '') {
+            $yPositionName += $yGap;
+            $this->drawCenteredText($image, $boldFontPath, $gaSoPosition, (int) round($width * 0.025), $yPositionName, $goldenText);
+        }
+
         $qrImage = $this->buildQrImage($guest);
         if ($qrImage !== null) {
+            $yPositionName += $yGap;
+
             $qrSize = (int) round(min($width, $height) * 0.35);
             $qrX = (int) round(($width - $qrSize) / 2);
-            $qrY = (int) round($height * 0.57);
+            $qrY = $yPositionName;
             imagecopyresampled(
                 $image,
                 $qrImage,
@@ -91,19 +102,13 @@ class ReservationUtil
             );
         }
 
-        $boldFontPath = dirname(__DIR__) . '/templates/fonts/Cinzel/static/Cinzel-Bold.ttf';
-        $this->drawCenteredText($image, $boldFontPath, $fullName, (int) round($width * 0.04), (int) round($height * 0.42), $goldenText);
-
-        if ($gaSoPosition !== '') {
-            $this->drawCenteredText($image, $boldFontPath, $gaSoPosition, (int) round($width * 0.025), (int) round($height * 0.48), $goldenText);
-        }
-
+        $yPositionName += $yGap + $qrSize;
         $this->drawCenteredText(
             $image,
             $boldFontPath,
             'Seat ' . ($seatNumber !== '' ? $seatNumber : 'Unassigned'),
             (int) round($width * 0.035),
-            (int) round($height * 0.54),
+            $yPositionName,
             $goldenText
         );
 

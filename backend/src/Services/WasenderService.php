@@ -37,6 +37,8 @@ class WasenderService
             ]);
         }
 
+        $response['waSentTime'] = date('Y-m-d H:i:s');
+
         return $response;
     }
 

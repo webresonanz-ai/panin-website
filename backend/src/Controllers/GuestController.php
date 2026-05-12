@@ -51,10 +51,9 @@ Karena kualitas menciptakan kepercayaan, dan ketekunan melahirkan keberhasilan, 
 
 Dengan hormat, kami mengundang Bapak/Ibu untuk hadir pada:
 
-Event: Annual Awards Dinner 2026
-Date: 22nd May 2026
-Time: 7:00 PM - 11:00 PM
-Venue: Fairmont Jakarta
+Acara: Annual Awards Dinner 2026
+Hari/Tanggal: Jumat, 22 Mei 2026
+Lokasi: Fairmont Jakarta
 
 Merupakan suatu kehormatan bagi kami atas kehadiran Bapak/Ibu dalam malam apresiasi yang penuh makna ini.
 
@@ -64,6 +63,8 @@ PaninDai-ichiLife
 CP: 0812-3456-7890 (PaninDai-ichiLife)";
 
         $result = $this->wasender->sendDocument($phoneNumber, $documentUrl, $fileName, $textWA);
+
+        $this->guests->saveWaSentTime($id);
 
         return [
             'message' => 'Invitation sent successfully via WhatsApp.',
