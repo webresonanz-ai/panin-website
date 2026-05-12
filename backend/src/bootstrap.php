@@ -38,3 +38,5 @@ if (is_file($envFile)) {
         $_ENV[trim($name)] = trim($value);
     }
 }
+
+date_default_timezone_set($_ENV['APP_TIMEZONE'] ?? 'Asia/Jakarta');

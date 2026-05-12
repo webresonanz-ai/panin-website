@@ -163,29 +163,34 @@ class GuestRepository
 
     public function saveWaSentTime(int $id, ?string $sentAt = null): void
     {
+        $timestamp = $sentAt ?? $this->currentTimestamp();
+
         $statement = $this->database->connection()->prepare(
             'UPDATE guests
-             SET wa_sent_time = COALESCE(:wa_sent_time, NOW()),
+             SET wa_sent_time = :wa_sent_time,
                  updated_at = NOW()
              WHERE id = :id'
         );
         $statement->execute([
             'id' => $id,
-            'wa_sent_time' => $sentAt,
+            'wa_sent_time' => $timestamp,
         ]);
     }
 
     public function markCheckedIn(int $id, string $method = 'qr_scan'): ?array
     {
+        $checkedInAt = $this->currentTimestamp();
+
         $statement = $this->database->connection()->prepare(
             'UPDATE guests
-             SET checked_in_at = COALESCE(checked_in_at, NOW()),
+             SET checked_in_at = COALESCE(checked_in_at, :checked_in_at),
                  check_in_method = COALESCE(check_in_method, :check_in_method),
                  updated_at = NOW()
              WHERE id = :id'
         );
         $statement->execute([
             'id' => $id,
+            'checked_in_at' => $checkedInAt,
             'check_in_method' => $method,
         ]);
 
@@ -241,5 +246,10 @@ class GuestRepository
     private function randomRegistrationSuffix(): string
     {
         return strtoupper(substr(bin2hex(random_bytes(2)), 0, 4));
+    }
+
+    private function currentTimestamp(): string
+    {
+        return date('Y-m-d H:i:s');
     }
 }
