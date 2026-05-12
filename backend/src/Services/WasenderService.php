@@ -16,7 +16,7 @@ class WasenderService
         $this->apiToken = $config->get('wasender.api_token', '');
     }
 
-    public function sendDocument(string $to, string $documentUrl, string $fileName): array
+    public function sendDocument(string $to, string $documentUrl, string $fileName, string $textWA): array
     {
         if ($this->apiToken === '') {
             throw new ApiException('Wasender API token is not configured.', 500);
@@ -26,7 +26,7 @@ class WasenderService
             'to' => $to,
             'documentUrl' => $documentUrl,
             'fileName' => $fileName,
-            'text' => 'Please find the attached document.',
+            'text' => $textWA,
         ];
 
         $response = $this->makeRequest($payload);
@@ -58,8 +58,6 @@ class WasenderService
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $error = curl_error($ch);
-
-        curl_close($ch);
 
         if ($error) {
             throw new ApiException('Wasender API request failed: ' . $error, 500);

@@ -43,8 +43,27 @@ class GuestController
         $appUrl = rtrim($this->config->get('app.url', ''), '/');
         $documentUrl = "{$appUrl}/api/guests/{$guest['id']}/invitation-ticket";
         $fileName = "Invitation - {$guest['fullName']}.pdf";
+        $textWA = "Selamat siang Bapak/Ibu {$guest['fullName']},
 
-        $result = $this->wasender->sendDocument($phoneNumber, $documentUrl, $fileName);
+Kehebatan tidak hanya diukur dari angka semata, tetapi dari kualitas, komitmen, integritas, dan profesionalisme yang senantiasa dijunjung tinggi.
+
+Karena kualitas menciptakan kepercayaan, dan ketekunan melahirkan keberhasilan, maka pada malam yang istimewa ini kami mengundang Bapak/Ibu untuk bersama-sama merayakan dedikasi dan pencapaian terbaik dari para agency force pilihan.
+
+Dengan hormat, kami mengundang Bapak/Ibu untuk hadir pada:
+
+Event: Annual Awards Dinner 2026
+Date: 22nd May 2026
+Time: 7:00 PM - 11:00 PM
+Venue: Fairmont Jakarta
+
+Merupakan suatu kehormatan bagi kami atas kehadiran Bapak/Ibu dalam malam apresiasi yang penuh makna ini.
+
+Hormat kami,
+PaninDai-ichiLife
+
+CP: 0812-3456-7890 (PaninDai-ichiLife)";
+
+        $result = $this->wasender->sendDocument($phoneNumber, $documentUrl, $fileName, $textWA);
 
         return [
             'message' => 'Invitation sent successfully via WhatsApp.',

@@ -66,6 +66,7 @@ class ReservationUtil
         $fontPath = $this->resolveFontPath();
 
         $darkText = imagecolorallocate($image, 31, 35, 45);
+        $goldenText = imagecolorallocate($image, 212, 175, 55);
 
         $fullName = $this->requiredValue($guest, 'fullName');
         $gaSoPosition = trim((string) ($guest['gaSoPosition'] ?? ''));
@@ -73,9 +74,9 @@ class ReservationUtil
 
         $qrImage = $this->buildQrImage($guest);
         if ($qrImage !== null) {
-            $qrSize = (int) round(min($width, $height) * 0.20);
-            $qrX = (int) round(($width - $qrSize) / 2) - 7;
-            $qrY = (int) round($height * 0.765);
+            $qrSize = (int) round(min($width, $height) * 0.35);
+            $qrX = (int) round(($width - $qrSize) / 2);
+            $qrY = (int) round($height * 0.57);
             imagecopyresampled(
                 $image,
                 $qrImage,
@@ -91,24 +92,23 @@ class ReservationUtil
         }
 
         $boldFontPath = dirname(__DIR__) . '/templates/fonts/Cinzel/static/Cinzel-Bold.ttf';
-        $this->drawCenteredText($image, $boldFontPath, $fullName, (int) round($width * 0.028), (int) round($height * 0.52), $darkText);
+        $this->drawCenteredText($image, $boldFontPath, $fullName, (int) round($width * 0.04), (int) round($height * 0.42), $goldenText);
 
         if ($gaSoPosition !== '') {
-            $this->drawCenteredText($image, $fontPath, $gaSoPosition, (int) round($width * 0.025), (int) round($height * 0.60), $darkText);
+            $this->drawCenteredText($image, $boldFontPath, $gaSoPosition, (int) round($width * 0.025), (int) round($height * 0.48), $goldenText);
         }
 
         $this->drawCenteredText(
             $image,
             $boldFontPath,
             'Seat ' . ($seatNumber !== '' ? $seatNumber : 'Unassigned'),
-            (int) round($width * 0.03),
-            (int) round($height * 0.69),
-            $darkText
+            (int) round($width * 0.035),
+            (int) round($height * 0.54),
+            $goldenText
         );
 
         $tempFile = tempnam(sys_get_temp_dir(), 'guest-ticket-');
         if ($tempFile === false) {
-            imagedestroy($image);
             throw new RuntimeException('Unable to allocate temporary storage for ticket generation.');
         }
 
