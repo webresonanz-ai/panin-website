@@ -76,23 +76,9 @@
                 <div class="col-md-6">
                   <article class="info-row h-100 align-items-start">
                     <div>
-                      <div class="text-luxury-faint small text-uppercase">Stay Window</div>
-                      <div class="fw-bold text-white mt-1">{{ formatDate(guest.checkIn) }}</div>
-                      <div class="text-luxury-soft small">
-                        through {{ formatDate(guest.checkOut) }}
-                      </div>
-                    </div>
-                  </article>
-                </div>
-                <div class="col-md-6">
-                  <article class="info-row h-100 align-items-start">
-                    <div>
                       <div class="text-luxury-faint small text-uppercase">Guest Profile</div>
                       <div class="fw-bold text-white mt-1">
-                        {{ guest.company || "Independent Guest" }}
-                      </div>
-                      <div class="text-luxury-soft small">
-                        {{ guest.position || "Position not listed" }}
+                        {{ guest.gaSoPosition || "Independent Guest" }}
                       </div>
                     </div>
                   </article>
@@ -101,25 +87,12 @@
                   <article class="info-row h-100 align-items-start">
                     <div>
                       <div class="text-luxury-faint small text-uppercase">Service Profile</div>
-                      <div class="fw-bold text-white mt-1">
-                        {{ guest.vipStatus ? "Concierge Priority" : "Signature Stay" }}
-                      </div>
                       <div class="text-luxury-soft small">
                         {{
                           guest.isCheckedIn
                             ? `Checked in ${formatDateTime(guest.checkedInAt)}`
                             : "Awaiting QR check-in"
                         }}
-                      </div>
-                    </div>
-                  </article>
-                </div>
-                <div class="col-12">
-                  <article class="info-row align-items-start">
-                    <div>
-                      <div class="text-luxury-faint small text-uppercase">Special Requests</div>
-                      <div class="fw-bold text-white mt-1">
-                        {{ guest.specialRequests || "No special requests recorded yet." }}
                       </div>
                     </div>
                   </article>

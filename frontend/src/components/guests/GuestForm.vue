@@ -35,47 +35,59 @@
               />
             </div>
           </div>
-
-        </div>
-      </div>
-
-      <div class="form-section">
-        <h4 class="panel-title">Stay Details</h4>
-        <div class="row g-3 mt-1">
-          <div class="col-md-6">
-            <label class="form-label text-luxury-soft">Check In *</label>
-            <input v-model="form.checkIn" type="date" class="form-control luxury-input" required />
+          <div class="col-md-12">
+            <label class="form-label text-luxury-soft">GA/SO/Position *</label>
+            <div class="input-group">
+              <span class="input-group-text border-accent">
+                <i class="bi bi-person"></i>
+              </span>
+              <input
+                v-model="form.gaSoPosition"
+                type="text"
+                class="form-control luxury-input"
+                required
+                placeholder="GA/SO/Position"
+              />
+            </div>
           </div>
-
-          <div class="col-md-6">
-            <label class="form-label text-luxury-soft">Check Out *</label>
-            <input v-model="form.checkOut" type="date" class="form-control luxury-input" required />
+          <div class="col-md-12">
+            <label class="form-label text-luxury-soft">Seat Number *</label>
+            <div class="input-group">
+              <span class="input-group-text border-accent">
+                <i class="bi bi-person"></i>
+              </span>
+              <input
+                v-model="form.seatNumber"
+                type="text"
+                class="form-control luxury-input"
+                required
+                placeholder="Seat Number"
+              />
+            </div>
           </div>
-
-          <div class="col-12">
-            <label class="form-label text-luxury-soft">Special Requests</label>
-            <textarea
-              v-model="form.specialRequests"
-              class="form-control luxury-input"
-              rows="4"
-              placeholder="Airport transfer, dining notes, spa itinerary, pillow preference..."
-            ></textarea>
+          <div class="col-md-12">
+            <label class="form-label text-luxury-soft">Phone Number *</label>
+            <div class="input-group">
+              <span class="input-group-text border-accent">
+                <i class="bi bi-person"></i>
+              </span>
+              <input
+                v-model="form.phoneNumber"
+                type="text"
+                class="form-control luxury-input"
+                required
+                placeholder="Phone Number"
+              />
+            </div>
           </div>
         </div>
       </div>
 
       <div class="form-foot">
-        <label class="vip-toggle" for="vipStatus">
-          <input id="vipStatus" v-model="form.vipStatus" type="checkbox" />
-          <span class="vip-toggle__control"></span>
-          <span class="vip-toggle__copy">
-            <strong>VIP Handling</strong>
-            <small>Mark this stay for premium service attention.</small>
-          </span>
-        </label>
-
         <div class="d-flex flex-wrap gap-2 justify-content-end">
-          <button type="button" class="btn luxury-btn-ghost" @click="$emit('cancel')">Cancel</button>
+          <button type="button" class="btn luxury-btn-ghost" @click="$emit('cancel')">
+            Cancel
+          </button>
           <button type="submit" class="btn luxury-btn">
             <i class="bi bi-check2-circle"></i>
             {{ isEditing ? "Update Guest" : "Register Guest" }}
@@ -104,10 +116,9 @@ const emit = defineEmits(["submit", "cancel"]);
 
 const defaultForm = () => ({
   fullName: "",
-  checkIn: "",
-  checkOut: "",
-  specialRequests: "",
-  vipStatus: false,
+  gaSoPosition: "",
+  seatNumber: "",
+  phoneNumber: "",
 });
 
 const form = ref(defaultForm());

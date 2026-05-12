@@ -13,7 +13,9 @@
           <div class="scanner-line" :class="{ 'scanner-line--success': scanSuccess }"></div>
           <div v-if="!scanningActive" class="scanner-placeholder">
             <i class="bi bi-qr-code-scan scanner-placeholder-icon"></i>
-            <p class="scanner-placeholder-text">Camera paused. Click Start to begin scanning.</p>
+            <p class="scanner-placeholder-text">
+              {{ cameraStarting ? "Starting scanner..." : "Camera paused." }}
+            </p>
           </div>
         </div>
 
@@ -70,15 +72,22 @@
             <p class="success-subtitle">Guest successfully admitted</p>
 
             <div class="success-guest-info">
-              <div class="guest-avatar">{{ lastResult.guest?.fullName?.charAt(0) || '?' }}</div>
+              <div class="guest-avatar">{{ lastResult.guest?.fullName?.charAt(0) || "?" }}</div>
               <div class="guest-details">
-                <div class="guest-name">{{ lastResult.guest?.fullName || 'Guest' }}</div>
-                <div class="guest-company">{{ lastResult.guest?.company || 'Independent Guest' }}</div>
+                <div class="guest-name">{{ lastResult.guest?.fullName || "Guest" }}</div>
+                <div class="guest-company">
+                  {{ lastResult.guest?.gaSoPosition || "Independent Guest" }}
+                </div>
+                <div class="guest-seat">
+                  Seat {{ lastResult.guest?.seatNumber || "Unassigned" }}
+                </div>
               </div>
             </div>
 
             <div class="success-actions">
-              <button type="button" class="btn luxury-btn" @click="closeResult">Continue Scanning</button>
+              <button type="button" class="btn luxury-btn" @click="closeResult">
+                Continue Scanning ({{ resultCountdown }})
+              </button>
             </div>
           </div>
         </div>
@@ -88,7 +97,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 import { useGuestStore } from "@/stores/guestStore";
 
 const confettiPieces = [
@@ -110,12 +119,15 @@ const cameraStarting = ref(false);
 const showResult = ref(false);
 const scanSuccess = ref(false);
 const lastResult = ref(null);
-const statusMessage = ref("Ready to scan. Click Start Scanner to begin.");
+const resultCountdown = ref(5);
+const statusMessage = ref("Starting scanner...");
 
 let mediaStream = null;
 let frameHandle = 0;
 let detector = null;
 let scanLocked = false;
+let successCountdownTimer = 0;
+let successAutoCloseTimer = 0;
 
 const detectorSupported = typeof window !== "undefined" && "BarcodeDetector" in window;
 
@@ -171,6 +183,49 @@ function stopCamera() {
   statusMessage.value = "Scanner stopped. Click Start to resume.";
 }
 
+function pauseScanner() {
+  cancelAnimationFrame(frameHandle);
+  frameHandle = 0;
+  scanningActive.value = false;
+}
+
+function clearResultTimers() {
+  clearInterval(successCountdownTimer);
+  clearTimeout(successAutoCloseTimer);
+  successCountdownTimer = 0;
+  successAutoCloseTimer = 0;
+}
+
+function startResultCountdown() {
+  clearResultTimers();
+  resultCountdown.value = 5;
+
+  successCountdownTimer = window.setInterval(() => {
+    if (resultCountdown.value > 1) {
+      resultCountdown.value -= 1;
+    }
+  }, 1000);
+
+  successAutoCloseTimer = window.setTimeout(() => {
+    closeResult();
+  }, 5000);
+}
+
+async function resumeScanner() {
+  if (showResult.value) return;
+
+  if (mediaStream && videoRef.value) {
+    videoRef.value.srcObject = mediaStream;
+    await videoRef.value.play();
+    scanningActive.value = true;
+    statusMessage.value = "Scanner active. Hold QR code within the frame.";
+    if (detectorSupported) scheduleScan();
+    return;
+  }
+
+  await startCamera();
+}
+
 function scheduleScan() {
   cancelAnimationFrame(frameHandle);
   frameHandle = requestAnimationFrame(scanFrame);
@@ -202,22 +257,37 @@ async function scanFrame() {
 async function handleCheckIn(code) {
   scanSuccess.value = true;
   setTimeout(() => (scanSuccess.value = false), 1200);
+  pauseScanner();
   statusMessage.value = "Processing...";
 
   try {
     const payload = await guestStore.checkInGuest(code);
     lastResult.value = payload;
     showResult.value = true;
+    startResultCountdown();
     statusMessage.value = "Guest check-in completed successfully.";
   } catch (error) {
+    await resumeScanner();
     statusMessage.value = error.message || "Failed to process QR code.";
   }
 }
 
-function closeResult() {
+async function closeResult() {
+  clearResultTimers();
   showResult.value = false;
   lastResult.value = null;
+  resultCountdown.value = 5;
+  await resumeScanner();
 }
+
+onMounted(() => {
+  startCamera();
+});
+
+onUnmounted(() => {
+  clearResultTimers();
+  stopCamera();
+});
 </script>
 
 <style scoped>
@@ -258,7 +328,8 @@ function closeResult() {
 
 .scanner-viewport-wrapper {
   aspect-ratio: 1 / 1;
-  background: radial-gradient(circle at top, rgba(104, 167, 255, 0.18), transparent 42%),
+  background:
+    radial-gradient(circle at top, rgba(104, 167, 255, 0.18), transparent 42%),
     linear-gradient(180deg, rgba(4, 14, 29, 0.96), rgba(5, 11, 22, 0.98));
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 24px;
@@ -281,7 +352,9 @@ function closeResult() {
   inset: 14%;
   pointer-events: none;
   position: absolute;
-  transition: box-shadow 0.25s ease, transform 0.25s ease;
+  transition:
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
 }
 
 .scanner-frame::before {
@@ -293,7 +366,9 @@ function closeResult() {
 }
 
 .scanner-frame--success {
-  box-shadow: 0 0 0 1px rgba(125, 234, 176, 0.42), 0 0 14px rgba(91, 221, 152, 0.28);
+  box-shadow:
+    0 0 0 1px rgba(125, 234, 176, 0.42),
+    0 0 14px rgba(91, 221, 152, 0.28);
   transform: scale(1.01);
 }
 
@@ -304,7 +379,10 @@ function closeResult() {
   inset-inline: 18%;
   position: absolute;
   top: 22%;
-  transition: background 0.25s ease, box-shadow 0.25s ease, height 0.25s ease;
+  transition:
+    background 0.25s ease,
+    box-shadow 0.25s ease,
+    height 0.25s ease;
 }
 
 .scanner-line--success {
@@ -372,7 +450,8 @@ function closeResult() {
 }
 
 .success-popup-glow {
-  background: radial-gradient(circle at top right, rgba(104, 167, 255, 0.22), transparent 36%),
+  background:
+    radial-gradient(circle at top right, rgba(104, 167, 255, 0.22), transparent 36%),
     radial-gradient(circle at bottom left, rgba(109, 228, 159, 0.18), transparent 32%);
   inset: 0;
   pointer-events: none;
@@ -475,6 +554,15 @@ function closeResult() {
 .guest-company {
   color: rgba(246, 247, 251, 0.68);
   font-size: 0.875rem;
+}
+
+.guest-seat {
+  color: rgba(125, 234, 176, 0.9);
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-top: 0.35rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .success-actions {
