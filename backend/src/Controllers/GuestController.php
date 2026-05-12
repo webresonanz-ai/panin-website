@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Core\ApiException;
 use App\Core\Config;
+use App\Core\Logger;
 use App\Core\Request;
 use App\Repositories\GuestRepository;
 use App\Services\GuestImportService;
@@ -26,15 +27,30 @@ class GuestController
     public function sendInvitation(Request $request): array
     {
         $id = (int) $request->attribute('id');
+        $this->logSendInvitation('send_invitation_started', [
+            'guestId' => $id,
+        ]);
+
         $guest = $this->guests->find($id);
 
         if (!$guest) {
+            $this->logSendInvitation('send_invitation_guest_not_found', [
+                'guestId' => $id,
+            ]);
             throw new ApiException('Guest not found.', 404);
         }
 
         $phoneNumber = trim((string) ($guest['phoneNumber'] ?? ''));
+        $this->logSendInvitation('send_invitation_guest_loaded', [
+            'guestId' => $id,
+            'fullName' => $guest['fullName'] ?? null,
+            'phoneNumber' => $this->maskPhoneNumber($phoneNumber),
+        ]);
 
         if ($phoneNumber === '') {
+            $this->logSendInvitation('send_invitation_missing_phone', [
+                'guestId' => $id,
+            ]);
             throw new ApiException('Guest does not have a phone number.', 422, [
                 'phone' => ['This guest cannot receive a WhatsApp message.'],
             ]);
@@ -62,9 +78,24 @@ PaninDai-ichiLife
 
 CP: 0812-3456-7890 (PaninDai-ichiLife)";
 
+        $this->logSendInvitation('send_invitation_dispatching_whatsapp', [
+            'guestId' => $id,
+            'documentUrl' => $documentUrl,
+            'fileName' => $fileName,
+            'phoneNumber' => $this->maskPhoneNumber($phoneNumber),
+        ]);
         $result = $this->wasender->sendDocument($phoneNumber, $documentUrl, $fileName, $textWA);
+        $this->logSendInvitation('send_invitation_whatsapp_sent', [
+            'guestId' => $id,
+            'waSentTime' => $result['waSentTime'] ?? null,
+            'wasenderStatus' => $result['status'] ?? null,
+        ]);
 
-        $this->guests->saveWaSentTime($id);
+        $this->guests->saveWaSentTime($id, $result['waSentTime'] ?? null);
+        $this->logSendInvitation('send_invitation_saved_wa_sent_time', [
+            'guestId' => $id,
+            'waSentTime' => $result['waSentTime'] ?? null,
+        ]);
 
         return [
             'message' => 'Invitation sent successfully via WhatsApp.',
@@ -301,5 +332,25 @@ CP: 0812-3456-7890 (PaninDai-ichiLife)";
         }
 
         return null;
+    }
+
+    private function logSendInvitation(string $event, array $context = []): void
+    {
+        Logger::info('whatsapp', '[GuestController] ' . $event, $context);
+    }
+
+    private function maskPhoneNumber(string $phoneNumber): string
+    {
+        $digits = preg_replace('/\D+/', '', $phoneNumber);
+
+        if ($digits === null || $digits === '') {
+            return '';
+        }
+
+        if (strlen($digits) <= 4) {
+            return str_repeat('*', strlen($digits));
+        }
+
+        return substr($digits, 0, 2) . str_repeat('*', max(strlen($digits) - 4, 0)) . substr($digits, -2);
     }
 }

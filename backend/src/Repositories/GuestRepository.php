@@ -30,7 +30,7 @@ class GuestRepository
         }
 
         $sql = 'SELECT id, full_name, registration_number, ga_so_position, seat_number, phone_number, created_at, updated_at
-                , checked_in_at, check_in_method
+                , wa_sent_time, checked_in_at, check_in_method
                 FROM guests';
 
         if ($clauses !== []) {
@@ -48,7 +48,7 @@ class GuestRepository
     public function find(int $id): ?array
     {
         $statement = $this->database->connection()->prepare(
-            'SELECT id, full_name, registration_number, ga_so_position, seat_number, phone_number, created_at, updated_at, checked_in_at, check_in_method
+            'SELECT id, full_name, registration_number, ga_so_position, seat_number, phone_number, created_at, updated_at, wa_sent_time, checked_in_at, check_in_method
              FROM guests WHERE id = :id LIMIT 1'
         );
         $statement->execute(['id' => $id]);
@@ -81,7 +81,7 @@ class GuestRepository
     public function findByRegistrationNumber(string $registrationNumber): ?array
     {
         $statement = $this->database->connection()->prepare(
-            'SELECT id, full_name, registration_number, ga_so_position, seat_number, phone_number, created_at, updated_at, checked_in_at, check_in_method
+            'SELECT id, full_name, registration_number, ga_so_position, seat_number, phone_number, created_at, updated_at, wa_sent_time, checked_in_at, check_in_method
              FROM guests WHERE registration_number = :registration_number LIMIT 1'
         );
         $statement->execute(['registration_number' => $registrationNumber]);
@@ -161,12 +161,18 @@ class GuestRepository
         $statement->execute(['id' => $id]);
     }
 
-    public function saveWaSentTime(int $id): void
+    public function saveWaSentTime(int $id, ?string $sentAt = null): void
     {
         $statement = $this->database->connection()->prepare(
-            'UPDATE guests SET wa_sent_time = NOW() WHERE id = :id'
+            'UPDATE guests
+             SET wa_sent_time = COALESCE(:wa_sent_time, NOW()),
+                 updated_at = NOW()
+             WHERE id = :id'
         );
-        $statement->execute(['id' => $id]);
+        $statement->execute([
+            'id' => $id,
+            'wa_sent_time' => $sentAt,
+        ]);
     }
 
     public function markCheckedIn(int $id, string $method = 'qr_scan'): ?array
@@ -195,6 +201,7 @@ class GuestRepository
             'gaSoPosition' => $guest['ga_so_position'],
             'seatNumber' => $guest['seat_number'],
             'phoneNumber' => $guest['phone_number'],
+            'waSentTime' => $guest['wa_sent_time'],
             'checkedInAt' => $guest['checked_in_at'],
             'checkInMethod' => $guest['check_in_method'],
             'isCheckedIn' => $guest['checked_in_at'] !== null,
