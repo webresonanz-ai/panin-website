@@ -6,9 +6,6 @@ export const useGuestStore = defineStore("guests", () => {
   const guests = ref([]);
   const stats = ref({
     totalGuests: 0,
-    activeGuests: 0,
-    pendingGuests: 0,
-    vipGuests: 0,
     checkedInGuests: 0,
     awaitingCheckInGuests: 0,
   });
@@ -17,9 +14,6 @@ export const useGuestStore = defineStore("guests", () => {
   const error = ref("");
 
   const allGuests = computed(() => guests.value);
-  const activeGuests = computed(() => guests.value.filter((guest) => guest.status === "active"));
-  const pendingGuests = computed(() => guests.value.filter((guest) => guest.status === "pending"));
-  const vipGuests = computed(() => guests.value.filter((guest) => guest.vipStatus));
   const totalGuests = computed(() => guests.value.length);
 
   const getGuestById = computed(() => {
@@ -30,9 +24,6 @@ export const useGuestStore = defineStore("guests", () => {
     guests.value = payload.guests || [];
     stats.value = payload.stats || {
       totalGuests: guests.value.length,
-      activeGuests: activeGuests.value.length,
-      pendingGuests: pendingGuests.value.length,
-      vipGuests: vipGuests.value.length,
       checkedInGuests: guests.value.filter((guest) => guest.isCheckedIn).length,
       awaitingCheckInGuests: guests.value.filter((guest) => !guest.isCheckedIn).length,
     };
@@ -106,9 +97,6 @@ export const useGuestStore = defineStore("guests", () => {
     loaded.value = false;
     stats.value = {
       totalGuests: 0,
-      activeGuests: 0,
-      pendingGuests: 0,
-      vipGuests: 0,
       checkedInGuests: 0,
       awaitingCheckInGuests: 0,
     };
@@ -121,9 +109,6 @@ export const useGuestStore = defineStore("guests", () => {
     loaded,
     error,
     allGuests,
-    activeGuests,
-    pendingGuests,
-    vipGuests,
     totalGuests,
     getGuestById,
     fetchGuests,

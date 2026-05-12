@@ -7,8 +7,8 @@
             <i class="bi bi-buildings"></i>
           </span>
           <span>
-            <span class="app-brand__eyebrow">The Residenz Collection</span>
-            <span class="app-brand__name">Guest Atelier</span>
+            <span class="app-brand__eyebrow">Annual Awarding Dinner 2026</span>
+            <span class="app-brand__name">PaninDai-ichiLife</span>
           </span>
         </router-link>
 
@@ -45,9 +45,12 @@
               </button>
             </li>
             <li v-else class="nav-item ms-lg-2 mt-3 mt-lg-0">
-              <router-link class="btn luxury-btn" :to="{ name: 'login', query: { redirect: '/register' } }">
-              <i class="bi bi-shield-lock"></i>
-              Staff Login
+              <router-link
+                class="btn luxury-btn"
+                :to="{ name: 'login', query: { redirect: '/register' } }"
+              >
+                <i class="bi bi-shield-lock"></i>
+                Staff Login
               </router-link>
             </li>
           </ul>

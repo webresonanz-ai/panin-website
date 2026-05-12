@@ -28,7 +28,7 @@ const stats = computed(() => [
   {
     icon: "bi bi-people-fill",
     kicker: "Portfolio",
-    title: "Guests in Residence",
+    title: "Guests Confirmed",
     value: guestStore.stats.totalGuests,
     note: "Live roster across premium inventory",
   },
@@ -45,13 +45,6 @@ const stats = computed(() => [
     title: "Awaiting Arrival",
     value: guestStore.stats.awaitingCheckInGuests,
     note: "Guests still waiting to be scanned on arrival",
-  },
-  {
-    icon: "bi bi-stars",
-    kicker: "Service Tier",
-    title: "VIP Experience",
-    value: guestStore.stats.vipGuests,
-    note: "Enhanced service journeys in progress",
   },
 ]);
 </script>

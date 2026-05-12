@@ -254,6 +254,8 @@ CP: 0812-3456-7890 (PaninDai-ichiLife)";
     {
         return [
             'totalGuests' => count($guests),
+            'checkedInGuests' => count(array_filter($guests, fn ($guest) => $guest['isCheckedIn'])),
+            'awaitingCheckInGuests' => count(array_filter($guests, fn ($guest) => !$guest['isCheckedIn'])),
         ];
     }
 

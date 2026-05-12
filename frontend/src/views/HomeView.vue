@@ -6,8 +6,8 @@
           <div class="eyebrow">Luxury Operations Dashboard</div>
           <h1 class="hero-title">Elevated guest management with a sharper hospitality rhythm.</h1>
           <p class="hero-subtitle">
-            Track arrivals, VIP moments, and stay readiness through a polished command surface
-            built around blue, ruby, and ivory harmony.
+            Track arrivals, VIP moments, and stay readiness through a polished command surface built
+            around blue, ruby, and ivory harmony.
           </p>
 
           <div class="d-flex flex-wrap gap-2 mt-4">
@@ -25,18 +25,10 @@
             </router-link>
           </div>
         </div>
-
-        <div class="col-xl-4">
-          <div class="metric-chip">
-            <small>Service Snapshot</small>
-            <h3>{{ guestStore.stats.checkedInGuests }}/{{ guestStore.totalGuests }}</h3>
-            <p>guests have cleared arrival and are ready for on-property service.</p>
-          </div>
-        </div>
       </div>
     </section>
 
-    <section class="mt-4">
+    <section class="mt-3">
       <GuestStats />
     </section>
 
@@ -48,7 +40,9 @@
           <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-3">
             <div>
               <h3 class="panel-title">Arrival Watchlist</h3>
-              <p class="panel-subtitle">High-touch stays that need eyes on timing and preferences.</p>
+              <p class="panel-subtitle">
+                High-touch stays that need eyes on timing and preferences.
+              </p>
             </div>
             <span class="badge-luxury">{{ recentCheckIns.length }} Live</span>
           </div>
@@ -58,7 +52,10 @@
               <div class="guest-avatar-small">{{ guest.fullName.charAt(0) }}</div>
               <div class="flex-grow-1">
                 <div class="fw-bold text-white">{{ guest.fullName }}</div>
-                <div class="text-luxury-faint small">{{ guest.seatNumber || "Unassigned seat" }} | {{ guest.company || "Independent Guest" }}</div>
+                <div class="text-luxury-faint small">
+                  {{ guest.seatNumber || "Unassigned seat" }} |
+                  {{ guest.company || "Independent Guest" }}
+                </div>
               </div>
               <span :class="statusClass(guest.status)">
                 <span class="timeline-dot"></span>
@@ -72,7 +69,9 @@
       <aside class="page-grid">
         <section class="luxury-card p-4 animate-fade-in animate-delayed-2">
           <h3 class="panel-title mb-2">VIP Lounge</h3>
-          <p class="panel-subtitle mb-4">Priority guests receiving enhanced service orchestration.</p>
+          <p class="panel-subtitle mb-4">
+            Priority guests receiving enhanced service orchestration.
+          </p>
 
           <div class="info-list">
             <article v-for="guest in guestStore.vipGuests" :key="guest.id" class="info-row">
@@ -82,7 +81,9 @@
                   <span>{{ guest.fullName }}</span>
                   <i class="bi bi-stars"></i>
                 </div>
-                <div class="text-luxury-faint small">{{ guest.specialRequests || "No special requests noted" }}</div>
+                <div class="text-luxury-faint small">
+                  {{ guest.specialRequests || "No special requests noted" }}
+                </div>
               </div>
             </article>
           </div>
@@ -97,21 +98,27 @@
               <span class="timeline-dot"></span>
               <div>
                 <div class="fw-bold text-white">Arrival pacing</div>
-                <div class="text-luxury-faint small">Pending guests are concentrated around the next check-in wave.</div>
+                <div class="text-luxury-faint small">
+                  Pending guests are concentrated around the next check-in wave.
+                </div>
               </div>
             </article>
             <article class="info-row">
               <span class="timeline-dot"></span>
               <div>
                 <div class="fw-bold text-white">Service composition</div>
-                <div class="text-luxury-faint small">VIP ratio remains strong for concierge-led upsell opportunities.</div>
+                <div class="text-luxury-faint small">
+                  VIP ratio remains strong for concierge-led upsell opportunities.
+                </div>
               </div>
             </article>
             <article class="info-row">
               <span class="timeline-dot"></span>
               <div>
                 <div class="fw-bold text-white">Guest sentiment</div>
-                <div class="text-luxury-faint small">Special requests are concentrated on dining, transfers, and spa needs.</div>
+                <div class="text-luxury-faint small">
+                  Special requests are concentrated on dining, transfers, and spa needs.
+                </div>
               </div>
             </article>
           </div>
