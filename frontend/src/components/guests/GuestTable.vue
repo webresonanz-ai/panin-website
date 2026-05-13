@@ -72,13 +72,14 @@
             </td>
             <td>
               <div class="d-flex justify-content-end gap-2">
-                <router-link
-                  :to="`/guest/${guest.id}`"
-                  class="action-icon action-accent"
-                  aria-label="View guest details"
+                <button
+                  type="button"
+                  class="action-icon"
+                  aria-label="Check in guest"
+                  @click="handleCheckIn(guest)"
                 >
-                  <i class="bi bi-eye"></i>
-                </router-link>
+                  <i class="bi bi-check2-circle"></i>
+                </button>
                 <button
                   type="button"
                   class="action-icon"
@@ -178,6 +179,23 @@ const formatDateTime = (date) =>
 
 const requireLogin = () => {
   router.push({ name: "login", query: { redirect: "/register" } });
+};
+
+const handleCheckIn = (guest) => {
+  if (!authStore.isAuthenticated) {
+    requireLogin();
+    return;
+  }
+
+  guestStore
+    .checkInGuest(guest.registrationNumber)
+    .then(() => {
+      guest.checkedInAt = new Date().toISOString();
+      guest.checkInMethod = "Dashboard";
+    })
+    .catch(() => {
+      alert("Failed to check in guest. Please try again.");
+    });
 };
 
 const handleEdit = (guest) => {
