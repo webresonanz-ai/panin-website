@@ -1,5 +1,10 @@
 <template>
   <div id="app">
+    <div class="app-background" aria-hidden="true">
+      <video class="app-background__video" autoplay muted loop playsinline preload="auto">
+        <source :src="auroraVideo" type="video/mp4" />
+      </video>
+    </div>
     <AppHeader v-if="!route.meta.hideHeader" />
     <main class="app-shell">
       <router-view v-slot="{ Component }">
@@ -14,6 +19,7 @@
 <script setup>
 import { useRoute } from "vue-router";
 import AppHeader from "@/components/layout/AppHeader.vue";
+import auroraVideo from "@/assets/videos/bg_aurora.mp4";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import "bootstrap-icons/font/bootstrap-icons.css";
@@ -23,6 +29,27 @@ const route = useRoute();
 </script>
 
 <style>
+.app-background {
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  position: fixed;
+  z-index: 0;
+}
+
+.app-background__video {
+  height: 100%;
+  left: 50%;
+  min-height: 100%;
+  min-width: 100%;
+  object-fit: cover;
+  opacity: 0.92;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+}
+
 .app-shell {
   position: relative;
   z-index: 1;

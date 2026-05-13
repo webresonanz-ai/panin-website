@@ -99,7 +99,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import { ref, watch } from "vue";
 
 const props = defineProps({
   guestData: {
@@ -123,11 +123,34 @@ const defaultForm = () => ({
 
 const form = ref(defaultForm());
 
-onMounted(() => {
-  if (props.guestData) {
-    form.value = { ...props.guestData };
+watch(
+  () => props.guestData,
+  (guestData) => {
+    if (guestData) {
+      form.value = {
+        fullName: guestData.fullName ?? "",
+        gaSoPosition: guestData.gaSoPosition ?? "",
+        seatNumber: guestData.seatNumber ?? "",
+        phoneNumber: guestData.phoneNumber ?? "",
+      };
+      return;
+    }
+
+    if (!props.isEditing) {
+      form.value = defaultForm();
+    }
+  },
+  { immediate: true }
+);
+
+watch(
+  () => props.isEditing,
+  (isEditing) => {
+    if (!isEditing && !props.guestData) {
+      form.value = defaultForm();
+    }
   }
-});
+);
 
 const handleSubmit = () => {
   emit("submit", { ...form.value });

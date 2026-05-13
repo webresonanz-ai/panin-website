@@ -90,12 +90,12 @@ class ReservationUtil
         );
 
         if ($gaSoPosition !== '') {
-            $yPositionName += $yGap;
+            $yPositionName += $yGap + 20;
             $this->drawCenteredText3D(
                 $image,
                 $boldFontPath,
                 $gaSoPosition,
-                (int) round($width * 0.025),
+                (int) round($width * 0.03),
                 $yPositionName,
                 $goldenText,
                 $goldenHighlight,
@@ -106,7 +106,7 @@ class ReservationUtil
 
         $qrImage = $this->buildQrImage($guest);
         if ($qrImage !== null) {
-            $yPositionName += $yGap;
+            $yPositionName += $yGap - 20;
 
             $qrSize = (int) round(min($width, $height) * 0.35);
             $qrX = (int) round(($width - $qrSize) / 2);
@@ -125,18 +125,33 @@ class ReservationUtil
             );
         }
 
-        $yPositionName += $yGap + $qrSize;
+        $yPositionName += $yGap + $qrSize - 10;
         $this->drawCenteredText3D(
             $image,
             $boldFontPath,
-            'Seat ' . ($seatNumber !== '' ? $seatNumber : 'Unassigned'),
-            (int) round($width * 0.035),
+            'Seat',
+            (int) round($width * 0.02),
             $yPositionName,
             $goldenText,
             $goldenHighlight,
             $whiteGlitter,
             $deepShadow
         );
+
+        if($seatNumber !== '') {
+            $yPositionName += $yGap;
+            $this->drawCenteredText3D(
+                $image,
+                $boldFontPath,
+                $seatNumber,
+                (int) round($width * 0.04),
+                $yPositionName,
+                $goldenText,
+                $goldenHighlight,
+                $whiteGlitter,
+                $deepShadow
+            );
+        }
 
         $tempFile = tempnam(sys_get_temp_dir(), 'guest-ticket-');
         if ($tempFile === false) {

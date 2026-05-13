@@ -57,7 +57,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import { ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useGuestStore } from "@/stores/guestStore";
 import GuestForm from "@/components/guests/GuestForm.vue";
@@ -69,17 +69,34 @@ const guestStore = useGuestStore();
 const isEditing = ref(false);
 const guestToEdit = ref(null);
 
-onMounted(async () => {
-  await guestStore.ensureLoaded();
-  const editId = route.query.edit;
-  if (editId) {
-    const guest = guestStore.getGuestById(Number(editId));
-    if (guest) {
-      guestToEdit.value = guest;
-      isEditing.value = true;
-    }
+async function syncEditingGuest(editId) {
+  if (!editId) {
+    guestToEdit.value = null;
+    isEditing.value = false;
+    return;
   }
-});
+
+  isEditing.value = true;
+  await guestStore.ensureLoaded();
+
+  let guest = guestStore.getGuestById(Number(editId));
+  if (!guest) {
+    guest = await guestStore.fetchGuest(Number(editId)).catch(() => null);
+  }
+
+  guestToEdit.value = guest;
+  if (!guest) {
+    isEditing.value = false;
+  }
+}
+
+watch(
+  () => route.query.edit,
+  (editId) => {
+    syncEditingGuest(editId);
+  },
+  { immediate: true }
+);
 
 const handleSubmit = async (formData) => {
   if (isEditing.value && guestToEdit.value) {
