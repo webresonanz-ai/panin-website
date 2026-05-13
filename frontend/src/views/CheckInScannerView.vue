@@ -600,6 +600,26 @@ onUnmounted(() => {
   }
 }
 
+@media (max-width: 1024px) and (orientation: portrait) {
+  .scanner-page {
+    justify-content: center;
+    padding-block: 1.5rem;
+    transform: translateY(-10vh);
+  }
+
+  .scanner-header {
+    margin-bottom: 1.25rem;
+  }
+
+  .scanner-header h1 {
+    font-size: clamp(1.8rem, 4vw, 2.3rem);
+  }
+
+  .scanner-main {
+    max-width: min(580px, 100%);
+  }
+}
+
 @keyframes scanPulse {
   0% {
     opacity: 0.2;
