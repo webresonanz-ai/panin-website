@@ -71,6 +71,8 @@ Acara: Annual Awards Dinner 2026
 Hari/Tanggal: Jumat, 22 Mei 2026
 Lokasi: Fairmont Jakarta
 
+*Mohon untuk membawa invitation ticket ini sebagai syarat registrasi dan akses masuk ke area acara.*
+
 Merupakan suatu kehormatan bagi kami atas kehadiran Bapak/Ibu dalam malam apresiasi yang penuh makna ini.
 
 Hormat kami,
