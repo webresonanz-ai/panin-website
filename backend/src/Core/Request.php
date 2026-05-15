@@ -24,7 +24,7 @@ class Request
             strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET'),
             rtrim($uri, '/') ?: '/',
             $_GET,
-            function_exists('getallheaders') ? getallheaders() : [],
+            self::captureHeaders(),
             file_get_contents('php://input') ?: ''
         );
     }
@@ -56,9 +56,9 @@ class Request
 
     public function bearerToken(): ?string
     {
-        $header = $this->header('Authorization');
+        $header = trim((string) $this->header('Authorization', ''));
 
-        if (!$header || !str_starts_with($header, 'Bearer ')) {
+        if ($header === '' || stripos($header, 'Bearer ') !== 0) {
             return null;
         }
 
@@ -120,5 +120,36 @@ class Request
         $contentType = (string) $this->header('Content-Type', '');
 
         return str_starts_with(strtolower($contentType), 'multipart/form-data');
+    }
+
+    private static function captureHeaders(): array
+    {
+        $headers = function_exists('getallheaders') ? getallheaders() : [];
+
+        foreach ($_SERVER as $key => $value) {
+            if (!is_string($value)) {
+                continue;
+            }
+
+            if (str_starts_with($key, 'HTTP_')) {
+                $headerName = str_replace('_', '-', substr($key, 5));
+                $headers[$headerName] = $value;
+                continue;
+            }
+
+            if (in_array($key, ['CONTENT_TYPE', 'CONTENT_LENGTH', 'CONTENT_MD5'], true)) {
+                $headerName = str_replace('_', '-', $key);
+                $headers[$headerName] = $value;
+            }
+        }
+
+        foreach (['HTTP_AUTHORIZATION', 'REDIRECT_HTTP_AUTHORIZATION', 'Authorization'] as $key) {
+            if (!empty($_SERVER[$key]) && is_string($_SERVER[$key])) {
+                $headers['Authorization'] = $_SERVER[$key];
+                break;
+            }
+        }
+
+        return $headers;
     }
 }

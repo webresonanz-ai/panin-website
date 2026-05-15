@@ -58,6 +58,19 @@ class GuestRepository
         return $guest ? $this->mapGuest($guest) : null;
     }
 
+    public function findAllPendingInvitation(): array
+    {
+        $statement = $this->database->connection()->prepare(
+            'SELECT id, full_name, registration_number, ga_so_position, seat_number, phone_number, created_at, updated_at, wa_sent_time, checked_in_at, check_in_method
+             FROM guests
+             WHERE wa_sent_time IS NULL OR wa_sent_time = \'\'
+             ORDER BY full_name ASC, id DESC'
+        );
+        $statement->execute();
+
+        return array_map([$this, 'mapGuest'], $statement->fetchAll());
+    }
+
     public function create(array $data): array
     {
         $connection = $this->database->connection();

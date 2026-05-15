@@ -8,13 +8,18 @@ use App\Core\Logger;
 
 class WasenderService
 {
-    private const API_URL = 'https://www.wasenderapi.com/api/send-message';
+    private const API_URL = 'https://wasenderapi.com/api/send-message';
 
     private string $apiToken;
 
     public function __construct(Config $config)
     {
         $this->apiToken = $config->get('wasender.api_token', '');
+
+        $this->logWasender('wasender_api_token_loaded', [
+            'isConfigured' => $this->apiToken !== '',
+            'tokenPreview' => $this->maskToken($this->apiToken),
+        ]);
     }
 
     public function sendDocument(string $to, string $documentUrl, string $fileName, string $textWA): array
@@ -40,11 +45,12 @@ class WasenderService
         $response = $this->makeRequest($payload);
 
         if (!isset($response['success']) || $response['success'] !== true) {
+            $errorMessage = $this->buildRequestFailureMessage($response);
             $this->logWasender('send_document_failed', [
                 'to' => $this->maskPhoneNumber($to),
                 'response' => $response,
             ]);
-            throw new ApiException('Failed to send WhatsApp message.', 500, [
+            throw new ApiException($errorMessage, 500, [
                 'wasender' => $response,
             ]);
         }
@@ -78,6 +84,7 @@ class WasenderService
             'to' => $this->maskPhoneNumber((string) ($payload['to'] ?? '')),
             'documentUrl' => $payload['documentUrl'] ?? null,
             'fileName' => $payload['fileName'] ?? null,
+            'tokenPreview' => $this->maskToken($this->apiToken),
         ]);
 
         $response = curl_exec($ch);
@@ -103,6 +110,17 @@ class WasenderService
             throw new ApiException('Invalid response from Wasender API.', 500);
         }
 
+        if (in_array($httpCode, [401, 403], true)) {
+            $this->logWasender('send_document_unauthorized', [
+                'to' => $this->maskPhoneNumber((string) ($payload['to'] ?? '')),
+                'httpCode' => $httpCode,
+                'response' => $decoded,
+            ]);
+            throw new ApiException('Wasender API token is invalid or unauthorized.', 500, [
+                'wasender' => $decoded,
+            ]);
+        }
+
         $this->logWasender('send_document_response_received', [
             'to' => $this->maskPhoneNumber((string) ($payload['to'] ?? '')),
             'httpCode' => $httpCode,
@@ -115,6 +133,32 @@ class WasenderService
     private function logWasender(string $event, array $context = []): void
     {
         Logger::info('whatsapp', '[WasenderService] ' . $event, $context);
+    }
+
+    private function buildRequestFailureMessage(array $response): string
+    {
+        $message = trim((string) ($response['message'] ?? $response['error'] ?? ''));
+
+        if ($message !== '') {
+            return 'Failed to send WhatsApp message: ' . $message;
+        }
+
+        return 'Failed to send WhatsApp message.';
+    }
+
+    private function maskToken(string $token): string
+    {
+        $token = trim($token);
+
+        if ($token === '') {
+            return '';
+        }
+
+        if (strlen($token) <= 8) {
+            return substr($token, 0, 2) . str_repeat('*', max(strlen($token) - 2, 0));
+        }
+
+        return substr($token, 0, 4) . str_repeat('*', max(strlen($token) - 8, 0)) . substr($token, -4);
     }
 
     private function maskPhoneNumber(string $phoneNumber): string

@@ -42,68 +42,65 @@ class GuestController
             throw new ApiException('Guest not found.', 404);
         }
 
-        $phoneNumber = trim((string) ($guest['phoneNumber'] ?? ''));
-        $this->logSendInvitation('send_invitation_guest_loaded', [
-            'guestId' => $id,
-            'fullName' => $guest['fullName'] ?? null,
-            'phoneNumber' => $this->maskPhoneNumber($phoneNumber),
-        ]);
-
-        if ($phoneNumber === '') {
-            $this->logSendInvitation('send_invitation_missing_phone', [
-                'guestId' => $id,
-            ]);
-            throw new ApiException('Guest does not have a phone number.', 422, [
-                'phone' => ['This guest cannot receive a WhatsApp message.'],
-            ]);
-        }
-
-        $appUrl = rtrim($this->config->get('app.url', ''), '/');
-        $documentUrl = "{$appUrl}/api/guests/{$guest['id']}/invitation-ticket";
-        $fileName = "Invitation - {$guest['fullName']}.pdf";
-        $textWA = "Selamat siang Bapak/Ibu {$guest['fullName']},
-
-Kehebatan tidak hanya diukur dari angka semata, tetapi dari kualitas, komitmen, integritas, dan profesionalisme yang senantiasa dijunjung tinggi.
-
-Karena kualitas menciptakan kepercayaan, dan ketekunan melahirkan keberhasilan, maka pada malam yang istimewa ini kami mengundang Bapak/Ibu untuk bersama-sama merayakan dedikasi dan pencapaian terbaik dari para agency force pilihan.
-
-Dengan hormat, kami mengundang Bapak/Ibu untuk hadir pada:
-
-Acara: Annual Awards Dinner 2026
-Hari/Tanggal: Jumat, 22 Mei 2026
-Lokasi: Fairmont Jakarta
-
-*Mohon untuk membawa invitation ticket ini sebagai syarat registrasi dan akses masuk ke area acara.*
-
-Merupakan suatu kehormatan bagi kami atas kehadiran Bapak/Ibu dalam malam apresiasi yang penuh makna ini.
-
-Hormat kami,
-PaninDai-ichiLife
-
-CP: 0812-3456-7890 (PaninDai-ichiLife)";
-
-        $this->logSendInvitation('send_invitation_dispatching_whatsapp', [
-            'guestId' => $id,
-            'documentUrl' => $documentUrl,
-            'fileName' => $fileName,
-            'phoneNumber' => $this->maskPhoneNumber($phoneNumber),
-        ]);
-        $result = $this->wasender->sendDocument($phoneNumber, $documentUrl, $fileName, $textWA);
-        $this->logSendInvitation('send_invitation_whatsapp_sent', [
-            'guestId' => $id,
-            'waSentTime' => $result['waSentTime'] ?? null,
-            'wasenderStatus' => $result['status'] ?? null,
-        ]);
-
-        $this->guests->saveWaSentTime($id, $result['waSentTime'] ?? null);
-        $this->logSendInvitation('send_invitation_saved_wa_sent_time', [
-            'guestId' => $id,
-            'waSentTime' => $result['waSentTime'] ?? null,
-        ]);
+        $result = $this->dispatchInvitation($guest);
 
         return [
             'message' => 'Invitation sent successfully via WhatsApp.',
             'data' => $result,
+        ];
+    }
+
+    public function sendPendingInvitations(Request $request): array
+    {
+        $this->assertCanManageGuests($request);
+
+        $pendingGuests = $this->guests->findAllPendingInvitation();
+        $this->logSendInvitation('send_pending_invitations_started', [
+            'pendingCount' => count($pendingGuests),
+        ]);
+
+        $sent = [];
+        $failed = [];
+
+        foreach ($pendingGuests as $guest) {
+            try {
+                $result = $this->dispatchInvitation($guest);
+                $sent[] = [
+                    'guestId' => $guest['id'],
+                    'fullName' => $guest['fullName'],
+                    'waSentTime' => $result['waSentTime'] ?? null,
+                    'status' => $result['status'] ?? null,
+                ];
+            } catch (\Throwable $exception) {
+                $this->logSendInvitation('send_pending_invitations_failed', [
+                    'guestId' => $guest['id'],
+                    'error' => $exception->getMessage(),
+                ]);
+                $failed[] = [
+                    'guestId' => $guest['id'],
+                    'fullName' => $guest['fullName'],
+                    'message' => $exception->getMessage(),
+                ];
+            }
+        }
+
+        $this->logSendInvitation('send_pending_invitations_finished', [
+            'pendingCount' => count($pendingGuests),
+            'sentCount' => count($sent),
+            'failedCount' => count($failed),
+        ]);
+
+        return [
+            'message' => count($sent) === 0
+                ? 'No pending invitations to send.'
+                : 'Pending invitations processed successfully.',
+            'data' => [
+                'totalPending' => count($pendingGuests),
+                'sentCount' => count($sent),
+                'failedCount' => count($failed),
+                'sent' => $sent,
+                'failed' => $failed,
+            ],
         ];
     }
 
@@ -249,7 +246,6 @@ CP: 0812-3456-7890 (PaninDai-ichiLife)";
 
     public function invitationTicket(Request $request): ?array
     {
-        $this->assertCanManageGuests($request);
         $guest = $this->guests->find((int) $request->attribute('id'));
 
         if (!$guest) {
@@ -357,6 +353,73 @@ CP: 0812-3456-7890 (PaninDai-ichiLife)";
     private function logSendInvitation(string $event, array $context = []): void
     {
         Logger::info('whatsapp', '[GuestController] ' . $event, $context);
+    }
+
+    private function dispatchInvitation(array $guest): array
+    {
+        $guestId = (int) ($guest['id'] ?? 0);
+        $phoneNumber = trim((string) ($guest['phoneNumber'] ?? ''));
+
+        $this->logSendInvitation('send_invitation_guest_loaded', [
+            'guestId' => $guestId,
+            'fullName' => $guest['fullName'] ?? null,
+            'phoneNumber' => $this->maskPhoneNumber($phoneNumber),
+        ]);
+
+        if ($phoneNumber === '') {
+            $this->logSendInvitation('send_invitation_missing_phone', [
+                'guestId' => $guestId,
+            ]);
+            throw new ApiException('Guest does not have a phone number.', 422, [
+                'phone' => ['This guest cannot receive a WhatsApp message.'],
+            ]);
+        }
+
+        $appUrl = rtrim($this->config->get('app.url', ''), '/');
+        $documentUrl = "{$appUrl}/api/guests/{$guestId}/invitation-ticket";
+        $fileName = "Invitation - {$guest['fullName']}.pdf";
+        $textWA = "Selamat siang Bapak/Ibu {$guest['fullName']},
+
+Kehebatan tidak hanya diukur dari angka semata, tetapi dari kualitas, komitmen, integritas, dan profesionalisme yang senantiasa dijunjung tinggi.
+
+Karena kualitas menciptakan kepercayaan, dan ketekunan melahirkan keberhasilan, maka pada malam yang istimewa ini kami mengundang Bapak/Ibu untuk bersama-sama merayakan dedikasi dan pencapaian terbaik dari para agency force pilihan.
+
+Dengan hormat, kami mengundang Bapak/Ibu untuk hadir pada:
+
+Acara: Annual Awards Dinner 2026
+Hari/Tanggal: Jumat, 22 Mei 2026
+Lokasi: Fairmont Jakarta
+
+*Mohon untuk membawa invitation ticket ini sebagai syarat registrasi dan akses masuk ke area acara.*
+
+Merupakan suatu kehormatan bagi kami atas kehadiran Bapak/Ibu dalam malam apresiasi yang penuh makna ini.
+
+Hormat kami,
+PaninDai-ichiLife
+
+CP: 0812-3456-7890 (PaninDai-ichiLife)";
+
+        $this->logSendInvitation('send_invitation_dispatching_whatsapp', [
+            'guestId' => $guestId,
+            'documentUrl' => $documentUrl,
+            'fileName' => $fileName,
+            'phoneNumber' => $this->maskPhoneNumber($phoneNumber),
+        ]);
+
+        $result = $this->wasender->sendDocument($phoneNumber, $documentUrl, $fileName, $textWA);
+        $this->logSendInvitation('send_invitation_whatsapp_sent', [
+            'guestId' => $guestId,
+            'waSentTime' => $result['waSentTime'] ?? null,
+            'wasenderStatus' => $result['status'] ?? null,
+        ]);
+
+        $this->guests->saveWaSentTime($guestId, $result['waSentTime'] ?? null);
+        $this->logSendInvitation('send_invitation_saved_wa_sent_time', [
+            'guestId' => $guestId,
+            'waSentTime' => $result['waSentTime'] ?? null,
+        ]);
+
+        return $result;
     }
 
     private function maskPhoneNumber(string $phoneNumber): string

@@ -47,6 +47,7 @@ npm run dev
 - `GET /api/guests`
 - `GET /api/guests/{id}`
 - `GET /api/guests/{id}/invitation-ticket`
+- `POST /api/guests/send-pending-invitations`
 - `POST /api/guests`
 - `POST /api/guests/import`
 - `PUT /api/guests/{id}`
@@ -55,6 +56,8 @@ npm run dev
 ## Invitation Ticket PDF
 
 Use `GET /api/guests/{id}/invitation-ticket` to generate a PDF invitation ticket for a guest. The endpoint returns `application/pdf` inline and uses the shared invitation template at `backend/templates/panin_invitation.png`.
+
+Use `POST /api/guests/send-pending-invitations` to send WhatsApp invitations only for guests whose `wa_sent_time` is still `NULL` or empty. Guests with an existing `wa_sent_time` are skipped automatically.
 
 Required runtime support:
 
