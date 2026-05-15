@@ -39,7 +39,7 @@
             <th>Guest</th>
             <th>Seat</th>
             <th>Checked-In</th>
-            <th class="text-end">Actions</th>
+            <th v-if="authStore.canManageGuests" class="text-end">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -70,7 +70,7 @@
                 </div>
               </div>
             </td>
-            <td>
+            <td v-if="authStore.canManageGuests">
               <div class="d-flex justify-content-end gap-2">
                 <button
                   type="button"
@@ -80,12 +80,7 @@
                 >
                   <i class="bi bi-check2-circle"></i>
                 </button>
-                <button
-                  type="button"
-                  class="action-icon"
-                  aria-label="Edit guest"
-                  @click="handleEdit(guest)"
-                >
+                <button type="button" class="action-icon" aria-label="Edit guest" @click="handleEdit(guest)">
                   <i class="bi bi-pencil"></i>
                 </button>
                 <button
@@ -178,7 +173,7 @@ const formatDateTime = (date) =>
   });
 
 const requireLogin = () => {
-  router.push({ name: "login", query: { redirect: "/register" } });
+  router.push({ name: "login", query: { redirect: "/guest-registration" } });
 };
 
 const handleCheckIn = (guest) => {

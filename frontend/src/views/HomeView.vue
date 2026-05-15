@@ -15,7 +15,7 @@
               <i class="bi bi-qr-code-scan"></i>
               Scan Check-In
             </router-link>
-            <router-link to="/register" class="btn luxury-btn">
+            <router-link to="/guest-registration" class="btn luxury-btn">
               <i class="bi bi-plus-circle"></i>
               New Registration
             </router-link>
@@ -145,7 +145,7 @@ onMounted(() => {
 const recentCheckIns = computed(() => guestStore.allGuests.slice(0, 3));
 
 const handleEdit = (guest) => {
-  router.push({ name: "register", query: { edit: guest.id } });
+  router.push({ name: "guest-register", query: { edit: guest.id } });
 };
 
 const handleDelete = async (id) => {

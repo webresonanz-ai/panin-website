@@ -5,10 +5,24 @@ CREATE TABLE IF NOT EXISTS users (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(120) NOT NULL,
     email VARCHAR(190) NOT NULL UNIQUE,
+    role ENUM('user', 'admin', 'manager') NOT NULL DEFAULT 'user',
     password_hash VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+SET @add_user_role = IF(
+    EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = DATABASE() AND table_name = 'users' AND column_name = 'role'
+    ),
+    'SELECT 1',
+    'ALTER TABLE users ADD COLUMN role ENUM(''user'', ''admin'', ''manager'') NOT NULL DEFAULT ''user'' AFTER email'
+);
+PREPARE stmt FROM @add_user_role;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
 CREATE TABLE IF NOT EXISTS api_tokens (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -85,20 +99,12 @@ PREPARE stmt FROM @drop_guest_suite;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
-INSERT INTO users (name, email, password_hash)
-SELECT 'Front Desk Admin', 'admin@luxuryhotel.test', '$2y$12$D002k3/UfVMYxorR896X8erG89F9GtQeLjDnFdc8wAQ79TYa68qA.'
+INSERT INTO users (name, email, role, password_hash)
+SELECT 'Front Desk Admin', 'admin@luxuryhotel.test', 'admin', '$2y$12$D002k3/UfVMYxorR896X8erG89F9GtQeLjDnFdc8wAQ79TYa68qA.'
 WHERE NOT EXISTS (
     SELECT 1 FROM users WHERE email = 'admin@luxuryhotel.test'
 );
 
-INSERT INTO guests (full_name, company, position, seat_number, check_in, check_out, status, special_requests, vip_status)
-SELECT 'Isabella Rossi', 'Rossi Holdings', 'Chairwoman', 'A01', '2026-04-30', '2026-05-05', 'active', 'Champagne upon arrival, Extra pillows', 1
-WHERE NOT EXISTS (SELECT 1 FROM guests WHERE full_name = 'Isabella Rossi' AND seat_number = 'A01');
-
-INSERT INTO guests (full_name, company, position, seat_number, check_in, check_out, status, special_requests, vip_status)
-SELECT 'Alexander Chen', 'Chen Ventures', 'Managing Director', 'B14', '2026-05-01', '2026-05-07', 'pending', 'Vegan meal plan, Airport transfer', 1
-WHERE NOT EXISTS (SELECT 1 FROM guests WHERE full_name = 'Alexander Chen' AND seat_number = 'B14');
-
-INSERT INTO guests (full_name, company, position, seat_number, check_in, check_out, status, special_requests, vip_status)
-SELECT 'Victoria Sterling', 'Sterling & Co.', 'Brand Director', 'C07', '2026-05-03', '2026-05-06', 'active', 'Spa appointments daily', 0
-WHERE NOT EXISTS (SELECT 1 FROM guests WHERE full_name = 'Victoria Sterling' AND seat_number = 'C07');
+UPDATE users
+SET role = 'admin'
+WHERE email = 'admin@luxuryhotel.test';

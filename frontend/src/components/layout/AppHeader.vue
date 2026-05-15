@@ -2,7 +2,10 @@
   <nav class="navbar navbar-expand-lg fixed-top app-nav">
     <div class="container-fluid px-3 px-lg-4">
       <div class="app-nav__shell w-100">
-        <router-link class="navbar-brand app-brand" to="/">
+        <router-link
+          class="navbar-brand app-brand"
+          :to="authStore.canManageGuests ? '/' : '/guests'"
+        >
           <span class="app-brand__crest">
             <i class="bi bi-buildings"></i>
           </span>
@@ -47,7 +50,7 @@
             <li v-else class="nav-item ms-lg-2 mt-3 mt-lg-0">
               <router-link
                 class="btn luxury-btn"
-                :to="{ name: 'login', query: { redirect: '/register' } }"
+                :to="{ name: 'login', query: { redirect: '/guest-registration' } }"
               >
                 <i class="bi bi-shield-lock"></i>
                 Staff Login
@@ -61,18 +64,23 @@
 </template>
 
 <script setup>
+import { computed } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/authStore";
 
 const router = useRouter();
 const authStore = useAuthStore();
 
-const navItems = [
-  { to: "/", label: "Dashboard", icon: "bi bi-grid-1x2-fill" },
-  { to: "/guests", label: "Guests", icon: "bi bi-people-fill" },
-  { to: "/check-in-scanner", label: "Scan Check-In", icon: "bi bi-qr-code-scan" },
-  { to: "/register", label: "Register", icon: "bi bi-person-plus-fill" },
-];
+const navItems = computed(() =>
+  authStore.canManageGuests
+    ? [
+        { to: "/", label: "Dashboard", icon: "bi bi-grid-1x2-fill" },
+        { to: "/guests", label: "Guests", icon: "bi bi-people-fill" },
+        { to: "/check-in-scanner", label: "Scan Check-In", icon: "bi bi-qr-code-scan" },
+        { to: "/guest-registration", label: "Register Guest", icon: "bi bi-person-plus-fill" },
+      ]
+    : [{ to: "/guests", label: "Guests", icon: "bi bi-people-fill" }],
+);
 
 const handleLogout = async () => {
   await authStore.logout();
@@ -111,7 +119,12 @@ const handleLogout = async () => {
 
 .app-brand__crest {
   align-items: center;
-  background: linear-gradient(135deg, rgba(255, 124, 53, 0.22), rgba(255, 74, 99, 0.2), rgba(57, 214, 255, 0.2));
+  background: linear-gradient(
+    135deg,
+    rgba(255, 124, 53, 0.22),
+    rgba(255, 74, 99, 0.2),
+    rgba(57, 214, 255, 0.2)
+  );
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 18px;
   color: var(--luxury-white);
@@ -166,7 +179,12 @@ const handleLogout = async () => {
 
 .app-link:hover,
 .app-link.router-link-exact-active {
-  background: linear-gradient(135deg, rgba(255, 85, 73, 0.12), rgba(255, 74, 99, 0.1), rgba(57, 214, 255, 0.12));
+  background: linear-gradient(
+    135deg,
+    rgba(255, 85, 73, 0.12),
+    rgba(255, 74, 99, 0.1),
+    rgba(57, 214, 255, 0.12)
+  );
   border-color: rgba(255, 255, 255, 0.14);
   color: var(--luxury-white) !important;
   transform: translateY(-1px);

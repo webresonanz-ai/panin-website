@@ -4,6 +4,8 @@ ALTER TABLE guests ADD COLUMN IF NOT EXISTS seat_number VARCHAR(50) NULL AFTER p
 ALTER TABLE guests ADD COLUMN IF NOT EXISTS registration_number VARCHAR(64) NULL AFTER full_name;
 ALTER TABLE guests ADD COLUMN IF NOT EXISTS checked_in_at DATETIME NULL AFTER vip_status;
 ALTER TABLE guests ADD COLUMN IF NOT EXISTS check_in_method VARCHAR(32) NULL AFTER checked_in_at;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS role ENUM('user', 'admin', 'manager') NOT NULL DEFAULT 'user' AFTER email;
+UPDATE users SET role = 'admin' WHERE email = 'admin@luxuryhotel.test';
 
 ----------------------------------------------------------------------------------------------------------
 

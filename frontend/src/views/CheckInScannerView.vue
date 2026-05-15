@@ -268,7 +268,11 @@ async function handleCheckIn(code) {
     statusMessage.value = "Guest check-in completed successfully.";
   } catch (error) {
     await resumeScanner();
-    statusMessage.value = error.message || "Failed to process QR code.";
+    if (error.status === 401 || error.status === 403) {
+      statusMessage.value = "Scanner is open, but check-in requires an admin or manager account.";
+    } else {
+      statusMessage.value = error.message || "Failed to process QR code.";
+    }
   }
 }
 

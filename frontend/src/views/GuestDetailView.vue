@@ -16,7 +16,7 @@
             </button>
             <router-link
               v-if="authStore.isAuthenticated"
-              :to="{ name: 'register', query: { edit: guest.id } }"
+              :to="{ name: 'guest-register', query: { edit: guest.id } }"
               class="btn luxury-btn"
             >
               <i class="bi bi-pencil-square"></i>
@@ -24,7 +24,7 @@
             </router-link>
             <router-link
               v-else
-              :to="{ name: 'login', query: { redirect: `/register?edit=${guest.id}` } }"
+              :to="{ name: 'login', query: { redirect: `/guest-registration?edit=${guest.id}` } }"
               class="btn luxury-btn"
             >
               <i class="bi bi-shield-lock"></i>

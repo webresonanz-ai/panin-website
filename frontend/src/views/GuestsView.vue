@@ -9,8 +9,8 @@
             Browse the full roster, prioritize arrivals, and act quickly without losing the premium tone.
           </p>
         </div>
-        <div class="col-lg-4 d-flex justify-content-lg-end">
-          <router-link to="/register" class="btn luxury-btn">
+        <div v-if="authStore.canManageGuests" class="col-lg-4 d-flex justify-content-lg-end">
+          <router-link to="/guest-registration" class="btn luxury-btn">
             <i class="bi bi-plus-circle"></i>
             Add Guest
           </router-link>
@@ -27,10 +27,12 @@
 <script setup>
 import { onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/authStore";
 import { useGuestStore } from "@/stores/guestStore";
 import GuestTable from "@/components/guests/GuestTable.vue";
 
 const router = useRouter();
+const authStore = useAuthStore();
 const guestStore = useGuestStore();
 
 onMounted(() => {
@@ -38,7 +40,7 @@ onMounted(() => {
 });
 
 const handleEdit = (guest) => {
-  router.push({ name: "register", query: { edit: guest.id } });
+  router.push({ name: "guest-register", query: { edit: guest.id } });
 };
 
 const handleDelete = async (id) => {

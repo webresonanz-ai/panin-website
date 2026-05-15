@@ -26,6 +26,8 @@ class GuestController
 
     public function sendInvitation(Request $request): array
     {
+        $this->assertCanManageGuests($request);
+
         $id = (int) $request->attribute('id');
         $this->logSendInvitation('send_invitation_started', [
             'guestId' => $id,
@@ -133,6 +135,7 @@ CP: 0812-3456-7890 (PaninDai-ichiLife)";
 
     public function store(Request $request): array
     {
+        $this->assertCanManageGuests($request);
         $payload = $this->validatePayload($request->body(), 'active');
         $guest = $this->guests->create($payload);
 
@@ -144,6 +147,7 @@ CP: 0812-3456-7890 (PaninDai-ichiLife)";
 
     public function update(Request $request): array
     {
+        $this->assertCanManageGuests($request);
         $id = (int) $request->attribute('id');
         $existingGuest = $this->guests->find($id);
 
@@ -162,6 +166,7 @@ CP: 0812-3456-7890 (PaninDai-ichiLife)";
 
     public function import(Request $request): array
     {
+        $this->assertCanManageGuests($request);
         $file = $request->file('file');
 
         if ($file === null) {
@@ -181,6 +186,7 @@ CP: 0812-3456-7890 (PaninDai-ichiLife)";
 
     public function destroy(Request $request): array
     {
+        $this->assertCanManageGuests($request);
         $id = (int) $request->attribute('id');
 
         if (!$this->guests->find($id)) {
@@ -194,6 +200,7 @@ CP: 0812-3456-7890 (PaninDai-ichiLife)";
 
     public function checkIn(Request $request): array
     {
+        $this->assertCanManageGuests($request);
         $payload = $request->body();
         $code = trim((string) ($payload['qrCode'] ?? $payload['registrationNumber'] ?? ''));
 
@@ -242,6 +249,7 @@ CP: 0812-3456-7890 (PaninDai-ichiLife)";
 
     public function invitationTicket(Request $request): ?array
     {
+        $this->assertCanManageGuests($request);
         $guest = $this->guests->find((int) $request->attribute('id'));
 
         if (!$guest) {
@@ -282,6 +290,16 @@ CP: 0812-3456-7890 (PaninDai-ichiLife)";
         }
 
         return $data;
+    }
+
+    private function assertCanManageGuests(Request $request): void
+    {
+        $user = $request->attribute('authUser');
+        $role = $user['role'] ?? null;
+
+        if (!in_array($role, ['admin', 'manager'], true)) {
+            throw new ApiException('You do not have permission to manage guests.', 403);
+        }
     }
 
     private function buildStats(array $guests): array

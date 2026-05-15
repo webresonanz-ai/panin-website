@@ -11,12 +11,11 @@
           </p>
 
           <div class="luxury-card p-4 mt-4 login-note">
-            <h3 class="panel-title mb-2">Starter Credentials</h3>
-            <p class="panel-subtitle mb-1">
-              Use the seeded admin account while you wire your own users.
+            <h3 class="panel-title mb-2">Why log in?</h3>
+            <p class="panel-subtitle mb-0">
+              The dashboard contains sensitive guest information and operational controls, so we
+              require staff authentication to ensure privacy and security.
             </p>
-            <div class="text-luxury-soft small">Email: admin@luxuryhotel.test</div>
-            <div class="text-luxury-soft small">Password: password123</div>
           </div>
         </section>
       </div>
@@ -52,6 +51,11 @@
               {{ authStore.loading ? "Signing In..." : "Sign In" }}
             </button>
           </form>
+
+          <p class="text-luxury-soft small mt-4 mb-0 text-center">
+            Need a new account?
+            <router-link :to="{ name: 'register' }" class="auth-link">Create one</router-link>
+          </p>
         </section>
       </aside>
     </section>
@@ -69,8 +73,8 @@ const authStore = useAuthStore();
 const errorMessage = ref("");
 
 const form = reactive({
-  email: "admin@luxuryhotel.test",
-  password: "password123",
+  email: "",
+  password: "",
 });
 
 const handleSubmit = async () => {
@@ -78,7 +82,8 @@ const handleSubmit = async () => {
 
   try {
     await authStore.login(form);
-    const redirectTarget = typeof route.query.redirect === "string" ? route.query.redirect : "/";
+    const redirectTarget =
+      typeof route.query.redirect === "string" ? route.query.redirect : authStore.defaultRoute;
     router.push(redirectTarget);
   } catch (error) {
     errorMessage.value = error.message || "Unable to sign in.";
@@ -93,5 +98,15 @@ const handleSubmit = async () => {
 
 .login-note {
   max-width: 32rem;
+}
+
+.auth-link {
+  color: var(--luxury-accent);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.auth-link:hover {
+  text-decoration: underline;
 }
 </style>

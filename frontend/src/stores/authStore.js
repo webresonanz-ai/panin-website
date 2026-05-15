@@ -12,6 +12,9 @@ export const useAuthStore = defineStore("auth", () => {
   const authChecked = ref(false);
 
   const isAuthenticated = computed(() => Boolean(token.value && user.value));
+  const role = computed(() => user.value?.role || "user");
+  const canManageGuests = computed(() => ["admin", "manager"].includes(role.value));
+  const defaultRoute = computed(() => (canManageGuests.value ? "/" : "/guests"));
 
   function persistSession(sessionToken, sessionUser) {
     token.value = sessionToken;
@@ -32,6 +35,19 @@ export const useAuthStore = defineStore("auth", () => {
 
     try {
       const response = await api.post("/api/auth/login", credentials);
+      persistSession(response.data.token, response.data.user);
+      authChecked.value = true;
+      return response.data.user;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function register(payload) {
+    loading.value = true;
+
+    try {
+      const response = await api.post("/api/auth/register", payload);
       persistSession(response.data.token, response.data.user);
       authChecked.value = true;
       return response.data.user;
@@ -75,7 +91,11 @@ export const useAuthStore = defineStore("auth", () => {
     loading,
     authChecked,
     isAuthenticated,
+    role,
+    canManageGuests,
+    defaultRoute,
     login,
+    register,
     logout,
     bootstrap,
     clearSession,
