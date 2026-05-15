@@ -68,8 +68,9 @@ class GuestController
                 $sent[] = [
                     'guestId' => $guest['id'],
                     'fullName' => $guest['fullName'],
+                    'wasenderMsgId' => $result['data']['msgId'] ?? null,
                     'waSentTime' => $result['waSentTime'] ?? null,
-                    'status' => $result['status'] ?? null,
+                    'status' => $result['data']['status'] ?? ($result['status'] ?? null),
                 ];
             } catch (\Throwable $exception) {
                 $this->logSendInvitation('send_pending_invitations_failed', [
@@ -99,6 +100,67 @@ class GuestController
                 'sentCount' => count($sent),
                 'failedCount' => count($failed),
                 'sent' => $sent,
+                'failed' => $failed,
+            ],
+        ];
+    }
+
+    public function checkPendingWasenderStatuses(Request $request): array
+    {
+        $this->assertCanManageGuests($request);
+
+        $pendingGuests = $this->guests->findAllPendingWasenderStatus();
+        $this->logSendInvitation('check_pending_wasender_statuses_started', [
+            'pendingCount' => count($pendingGuests),
+        ]);
+
+        $updated = [];
+        $failed = [];
+
+        foreach ($pendingGuests as $guest) {
+            try {
+                $result = $this->wasender->getMessageInfo((string) $guest['wasenderMsgId']);
+                $normalizedStatus = $this->wasender->normalizeStatus($result['data']['status'] ?? null);
+
+                $this->guests->saveWasenderStatus($guest['id'], $normalizedStatus);
+
+                $updated[] = [
+                    'guestId' => $guest['id'],
+                    'fullName' => $guest['fullName'],
+                    'wasenderMsgId' => $guest['wasenderMsgId'],
+                    'status' => $normalizedStatus,
+                    'rawStatus' => $result['data']['status'] ?? null,
+                ];
+            } catch (\Throwable $exception) {
+                $this->logSendInvitation('check_pending_wasender_statuses_failed', [
+                    'guestId' => $guest['id'],
+                    'wasenderMsgId' => $guest['wasenderMsgId'],
+                    'error' => $exception->getMessage(),
+                ]);
+                $failed[] = [
+                    'guestId' => $guest['id'],
+                    'fullName' => $guest['fullName'],
+                    'wasenderMsgId' => $guest['wasenderMsgId'],
+                    'message' => $exception->getMessage(),
+                ];
+            }
+        }
+
+        $this->logSendInvitation('check_pending_wasender_statuses_finished', [
+            'pendingCount' => count($pendingGuests),
+            'updatedCount' => count($updated),
+            'failedCount' => count($failed),
+        ]);
+
+        return [
+            'message' => count($updated) === 0
+                ? 'No pending Wasender statuses to update.'
+                : 'Pending Wasender statuses checked successfully.',
+            'data' => [
+                'totalPending' => count($pendingGuests),
+                'updatedCount' => count($updated),
+                'failedCount' => count($failed),
+                'updated' => $updated,
                 'failed' => $failed,
             ],
         ];
@@ -409,14 +471,22 @@ CP: 0812-3456-7890 (PaninDai-ichiLife)";
         $result = $this->wasender->sendDocument($phoneNumber, $documentUrl, $fileName, $textWA);
         $this->logSendInvitation('send_invitation_whatsapp_sent', [
             'guestId' => $guestId,
+            'wasenderMsgId' => $result['data']['msgId'] ?? null,
             'waSentTime' => $result['waSentTime'] ?? null,
-            'wasenderStatus' => $result['status'] ?? null,
+            'wasenderStatus' => $result['data']['status'] ?? ($result['status'] ?? null),
         ]);
 
-        $this->guests->saveWaSentTime($guestId, $result['waSentTime'] ?? null);
-        $this->logSendInvitation('send_invitation_saved_wa_sent_time', [
+        $this->guests->saveWasenderDelivery(
+            $guestId,
+            isset($result['data']['msgId']) ? (string) $result['data']['msgId'] : null,
+            $this->wasender->normalizeStatus($result['data']['status'] ?? null),
+            $result['waSentTime'] ?? null
+        );
+        $this->logSendInvitation('send_invitation_saved_delivery_result', [
             'guestId' => $guestId,
+            'wasenderMsgId' => $result['data']['msgId'] ?? null,
             'waSentTime' => $result['waSentTime'] ?? null,
+            'wasenderStatus' => $result['data']['status'] ?? null,
         ]);
 
         return $result;

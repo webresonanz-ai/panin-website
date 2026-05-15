@@ -21,3 +21,9 @@ ALTER TABLE guests DROP COLUMN status;
 ALTER TABLE guests ADD COLUMN phone_number VARCHAR(32) NULL AFTER seat_number;
 ALTER TABLE guests
 ALTER COLUMN registration_number SET DEFAULT NULL;
+
+----------------------------------------------------------------------------------------------------------------
+
+ALTER TABLE guests ADD COLUMN wasender_msgId VARCHAR(100) NULL AFTER phone_number;
+ALTER TABLE guests ADD COLUMN wasender_status ENUM('error', 'pending', 'sent', 'delivered', 'read', 'played') NULL AFTER wa_sent_time;
+ALTER TABLE guests MODIFY COLUMN wasender_status ENUM('error', 'pending', 'sent', 'delivered', 'read', 'played') NULL DEFAULT 'pending';

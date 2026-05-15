@@ -19,6 +19,7 @@ $router->get('/api/guests/{id}', [GuestController::class, 'show'], [AuthMiddlewa
 $router->get('/api/guests/{id}/invitation-ticket', [GuestController::class, 'invitationTicket']);
 $router->post('/api/guests/{id}/send-invitation', [GuestController::class, 'sendInvitation'], [AuthMiddleware::class]);
 $router->post('/api/guests/send-pending-invitations', [GuestController::class, 'sendPendingInvitations'], [AuthMiddleware::class]);
+$router->post('/api/guests/check-pending-wasender-statuses', [GuestController::class, 'checkPendingWasenderStatuses'], [AuthMiddleware::class]);
 $router->post('/api/guests', [GuestController::class, 'store'], [AuthMiddleware::class]);
 $router->post('/api/guests/import', [GuestController::class, 'import'], [AuthMiddleware::class]);
 $router->put('/api/guests/{id}', [GuestController::class, 'update'], [AuthMiddleware::class]);

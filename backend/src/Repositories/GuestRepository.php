@@ -30,7 +30,7 @@ class GuestRepository
         }
 
         $sql = 'SELECT id, full_name, registration_number, ga_so_position, seat_number, phone_number, created_at, updated_at
-                , wa_sent_time, checked_in_at, check_in_method
+                , wasender_msgId, wa_sent_time, wasender_status, checked_in_at, check_in_method
                 FROM guests';
 
         if ($clauses !== []) {
@@ -48,7 +48,7 @@ class GuestRepository
     public function find(int $id): ?array
     {
         $statement = $this->database->connection()->prepare(
-            'SELECT id, full_name, registration_number, ga_so_position, seat_number, phone_number, created_at, updated_at, wa_sent_time, checked_in_at, check_in_method
+            'SELECT id, full_name, registration_number, ga_so_position, seat_number, phone_number, created_at, updated_at, wasender_msgId, wa_sent_time, wasender_status, checked_in_at, check_in_method
              FROM guests WHERE id = :id LIMIT 1'
         );
         $statement->execute(['id' => $id]);
@@ -61,12 +61,29 @@ class GuestRepository
     public function findAllPendingInvitation(): array
     {
         $statement = $this->database->connection()->prepare(
-            'SELECT id, full_name, registration_number, ga_so_position, seat_number, phone_number, created_at, updated_at, wa_sent_time, checked_in_at, check_in_method
+            'SELECT id, full_name, registration_number, ga_so_position, seat_number, phone_number, created_at, updated_at, wasender_msgId, wa_sent_time, wasender_status, checked_in_at, check_in_method
              FROM guests
              WHERE wa_sent_time IS NULL OR wa_sent_time = \'\'
              ORDER BY full_name ASC, id DESC'
         );
         $statement->execute();
+
+        return array_map([$this, 'mapGuest'], $statement->fetchAll());
+    }
+
+    public function findAllPendingWasenderStatus(): array
+    {
+        $statement = $this->database->connection()->prepare(
+            'SELECT id, full_name, registration_number, ga_so_position, seat_number, phone_number, created_at, updated_at, wasender_msgId, wa_sent_time, wasender_status, checked_in_at, check_in_method
+             FROM guests
+             WHERE wasender_status = :wasender_status
+               AND wasender_msgId IS NOT NULL
+               AND wasender_msgId <> \'\'
+             ORDER BY full_name ASC, id DESC'
+        );
+        $statement->execute([
+            'wasender_status' => 'pending',
+        ]);
 
         return array_map([$this, 'mapGuest'], $statement->fetchAll());
     }
@@ -94,7 +111,7 @@ class GuestRepository
     public function findByRegistrationNumber(string $registrationNumber): ?array
     {
         $statement = $this->database->connection()->prepare(
-            'SELECT id, full_name, registration_number, ga_so_position, seat_number, phone_number, created_at, updated_at, wa_sent_time, checked_in_at, check_in_method
+            'SELECT id, full_name, registration_number, ga_so_position, seat_number, phone_number, created_at, updated_at, wasender_msgId, wa_sent_time, wasender_status, checked_in_at, check_in_method
              FROM guests WHERE registration_number = :registration_number LIMIT 1'
         );
         $statement->execute(['registration_number' => $registrationNumber]);
@@ -190,6 +207,40 @@ class GuestRepository
         ]);
     }
 
+    public function saveWasenderDelivery(int $id, ?string $messageId = null, ?string $status = null, ?string $sentAt = null): void
+    {
+        $timestamp = $sentAt ?? $this->currentTimestamp();
+
+        $statement = $this->database->connection()->prepare(
+            'UPDATE guests
+             SET wasender_msgId = :wasender_msgId,
+                 wa_sent_time = :wa_sent_time,
+                 wasender_status = :wasender_status,
+                 updated_at = NOW()
+             WHERE id = :id'
+        );
+        $statement->execute([
+            'id' => $id,
+            'wasender_msgId' => $messageId,
+            'wa_sent_time' => $timestamp,
+            'wasender_status' => $status,
+        ]);
+    }
+
+    public function saveWasenderStatus(int $id, ?string $status = null): void
+    {
+        $statement = $this->database->connection()->prepare(
+            'UPDATE guests
+             SET wasender_status = :wasender_status,
+                 updated_at = NOW()
+             WHERE id = :id'
+        );
+        $statement->execute([
+            'id' => $id,
+            'wasender_status' => $status,
+        ]);
+    }
+
     public function markCheckedIn(int $id, string $method = 'qr_scan'): ?array
     {
         $checkedInAt = $this->currentTimestamp();
@@ -219,7 +270,9 @@ class GuestRepository
             'gaSoPosition' => $guest['ga_so_position'],
             'seatNumber' => $guest['seat_number'],
             'phoneNumber' => $guest['phone_number'],
+            'wasenderMsgId' => $guest['wasender_msgId'],
             'waSentTime' => $guest['wa_sent_time'],
+            'wasenderStatus' => $guest['wasender_status'],
             'checkedInAt' => $guest['checked_in_at'],
             'checkInMethod' => $guest['check_in_method'],
             'isCheckedIn' => $guest['checked_in_at'] !== null,
