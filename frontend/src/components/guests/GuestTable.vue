@@ -299,6 +299,14 @@ const confirmDelete = (guest) => {
   color: rgba(246, 247, 251, 0.92);
 }
 
+.guest-avatar {
+  flex-shrink: 0;
+}
+
+.badge-luxury {
+  white-space: nowrap;
+}
+
 .service-badge {
   gap: 0.35rem;
 }
@@ -327,6 +335,23 @@ const confirmDelete = (guest) => {
 }
 
 @media (max-width: 767.98px) {
+  .table-luxury {
+    font-size: 0.875rem;
+  }
+
+  .table-luxury th {
+    font-size: 0.72rem;
+  }
+
+  .table-luxury .fw-bold {
+    font-size: 0.9rem;
+  }
+
+  .table-luxury .small,
+  .badge-luxury {
+    font-size: 0.68rem;
+  }
+
   .search-shell {
     min-width: 100%;
   }
