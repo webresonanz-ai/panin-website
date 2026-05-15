@@ -4,7 +4,7 @@
       <div class="app-nav__shell w-100">
         <router-link
           class="navbar-brand app-brand"
-          :to="authStore.canManageGuests ? '/' : '/guests'"
+          :to="authStore.canManageGuests ? '/guests' : '/'"
           @click="closeMenu"
         >
           <span class="app-brand__crest">

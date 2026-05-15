@@ -17,17 +17,13 @@
           />
         </div>
 
-        <div class="status-filter" role="tablist" aria-label="Filter guest status">
-          <button
-            v-for="option in filterOptions"
-            :key="option.value"
-            type="button"
-            class="status-filter__button"
-            :class="{ 'status-filter__button--active': statusFilter === option.value }"
-            @click="statusFilter = option.value"
-          >
-            {{ option.label }}
-          </button>
+        <div class="status-filter">
+          <i class="bi bi-funnel"></i>
+          <select v-model="statusFilter" class="status-filter__select" aria-label="Filter guest status">
+            <option v-for="option in filterOptions" :key="option.value" :value="option.value">
+              {{ option.label }}
+            </option>
+          </select>
         </div>
       </div>
     </div>
@@ -38,7 +34,7 @@
           <tr>
             <th>Guest</th>
             <th>Seat</th>
-            <th>Checked-In</th>
+            <th class="text-nowrap">Checked-In</th>
             <th v-if="authStore.canManageGuests" class="text-end">Actions</th>
           </tr>
         </thead>
@@ -254,29 +250,34 @@ const confirmDelete = (guest) => {
 }
 
 .status-filter {
+  align-items: center;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 999px;
   display: inline-flex;
-  gap: 0.25rem;
-  padding: 0.35rem;
+  color: rgba(246, 247, 251, 0.58);
+  gap: 0.7rem;
+  min-width: 220px;
+  padding: 0.8rem 1rem;
 }
 
-.status-filter__button {
+.status-filter__select {
+  appearance: none;
   background: transparent;
   border: 0;
-  border-radius: 999px;
-  color: rgba(246, 247, 251, 0.58);
+  color: var(--luxury-white);
+  cursor: pointer;
+  flex: 1;
   font-size: 0.82rem;
   font-weight: 800;
   letter-spacing: 0.08em;
-  padding: 0.65rem 0.95rem;
+  outline: 0;
+  padding-right: 1rem;
   text-transform: uppercase;
-  transition: all 180ms ease;
 }
 
-.status-filter__button--active {
-  background: linear-gradient(135deg, rgba(104, 167, 255, 0.18), rgba(217, 72, 98, 0.18));
+.status-filter__select option {
+  background: #0a1228;
   color: var(--luxury-white);
 }
 
@@ -357,7 +358,7 @@ const confirmDelete = (guest) => {
   }
 
   .status-filter {
-    flex-wrap: wrap;
+    min-width: 100%;
   }
 }
 </style>
