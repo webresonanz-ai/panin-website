@@ -68,8 +68,8 @@
               <i class="bi bi-check-circle-fill success-icon"></i>
             </div>
 
-            <h2 class="success-title">Check-In Complete!</h2>
-            <p class="success-subtitle">Guest successfully admitted</p>
+            <h2 class="success-title">{{ popupTitle }}</h2>
+            <p class="success-subtitle">{{ popupSubtitle }}</p>
 
             <div class="success-guest-info">
               <div class="guest-avatar">{{ lastResult.guest?.fullName?.charAt(0) || "?" }}</div>
@@ -87,6 +87,10 @@
               </div>
             </div>
 
+            <p v-if="alreadyCheckedInMessage" class="already-checked-in-notice">
+              {{ alreadyCheckedInMessage }}
+            </p>
+
             <div class="success-actions">
               <button type="button" class="btn luxury-btn" @click="closeResult">
                 Continue Scanning ({{ resultCountdown }})
@@ -100,7 +104,7 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import jsQR from "jsqr";
 import { useGuestStore } from "@/stores/guestStore";
 
@@ -126,6 +130,28 @@ const lastResult = ref(null);
 const resultCountdown = ref(5);
 const statusMessage = ref("Starting scanner...");
 
+const popupTitle = computed(() =>
+  lastResult.value?.status === "already_checked_in" ? "Already Checked In" : "Check-In Complete!",
+);
+
+const popupSubtitle = computed(() =>
+  lastResult.value?.status === "already_checked_in"
+    ? "Guest was already admitted earlier"
+    : "Guest successfully admitted",
+);
+
+const alreadyCheckedInMessage = computed(() => {
+  if (lastResult.value?.status !== "already_checked_in") return "";
+
+  const checkedInAt = lastResult.value?.guest?.checkedInAt;
+
+  if (!checkedInAt) {
+    return "You have already checked in.";
+  }
+
+  return `You have already checked in at ${formatDateTime(checkedInAt)}.`;
+});
+
 let mediaStream = null;
 let frameHandle = 0;
 let detector = null;
@@ -136,6 +162,15 @@ let fallbackCanvas = null;
 let fallbackContext = null;
 
 const detectorSupported = typeof window !== "undefined" && "BarcodeDetector" in window;
+
+const formatDateTime = (date) =>
+  new Date(date).toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 
 async function startCamera() {
   if (cameraStarting.value || scanningActive.value) return;
@@ -307,7 +342,11 @@ async function handleCheckIn(code) {
     const payload = await guestStore.checkInGuest(code);
     lastResult.value = payload;
     showResult.value = true;
-    statusMessage.value = "Guest check-in completed successfully.";
+    statusMessage.value =
+      payload.status === "already_checked_in"
+        ? "Guest was already checked in."
+        : "Guest check-in completed successfully.";
+    startResultCountdown();
   } catch (error) {
     await resumeScanner();
     if (error.status === 401 || error.status === 403) {
@@ -644,6 +683,14 @@ onUnmounted(() => {
 
 .success-actions {
   margin-top: 1rem;
+}
+
+.already-checked-in-notice {
+  color: #ff5f5f;
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: -0.35rem auto 1.5rem;
+  max-width: 42rem;
 }
 
 .success-popup-enter-active,
