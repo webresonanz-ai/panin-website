@@ -79,7 +79,10 @@
                   {{ lastResult.guest?.gaSoPosition || "Independent Guest" }}
                 </div>
                 <div class="guest-seat">
-                  Seat {{ lastResult.guest?.seatNumber || "Unassigned" }}
+                  <span class="guest-seat-label">Seat</span>
+                  <span class="guest-seat-value">
+                    {{ lastResult.guest?.seatNumber || "Unassigned" }}
+                  </span>
                 </div>
               </div>
             </div>
@@ -98,6 +101,7 @@
 
 <script setup>
 import { onMounted, onUnmounted, ref } from "vue";
+import jsQR from "jsqr";
 import { useGuestStore } from "@/stores/guestStore";
 
 const confettiPieces = [
@@ -128,6 +132,8 @@ let detector = null;
 let scanLocked = false;
 let successCountdownTimer = 0;
 let successAutoCloseTimer = 0;
+let fallbackCanvas = null;
+let fallbackContext = null;
 
 const detectorSupported = typeof window !== "undefined" && "BarcodeDetector" in window;
 
@@ -154,10 +160,12 @@ async function startCamera() {
     if (detectorSupported) {
       detector = new window.BarcodeDetector({ formats: ["qr_code"] });
       statusMessage.value = "Scanner active. Hold QR code within the frame.";
-      scheduleScan();
     } else {
-      statusMessage.value = "Camera live. Native QR detection not supported on this browser.";
+      detector = null;
+      statusMessage.value = "Scanner active. Using browser-compatible QR detection.";
     }
+
+    scheduleScan();
   } catch {
     statusMessage.value = "Camera access denied. Please allow camera permissions.";
   } finally {
@@ -231,16 +239,51 @@ function scheduleScan() {
   frameHandle = requestAnimationFrame(scanFrame);
 }
 
+function ensureFallbackCanvas(width, height) {
+  if (!fallbackCanvas) fallbackCanvas = document.createElement("canvas");
+  if (!fallbackContext)
+    fallbackContext = fallbackCanvas.getContext("2d", { willReadFrequently: true });
+  if (!fallbackContext) return null;
+
+  if (fallbackCanvas.width !== width) fallbackCanvas.width = width;
+  if (fallbackCanvas.height !== height) fallbackCanvas.height = height;
+
+  return fallbackContext;
+}
+
 async function scanFrame() {
   if (!scanningActive.value) return;
-  if (!videoRef.value || !detector || scanLocked) {
+  if (!videoRef.value || scanLocked) {
     scheduleScan();
     return;
   }
 
   try {
-    const barcodes = await detector.detect(videoRef.value);
-    const code = barcodes[0]?.rawValue?.trim();
+    if (videoRef.value.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
+      scheduleScan();
+      return;
+    }
+
+    let code = "";
+
+    if (detector) {
+      const barcodes = await detector.detect(videoRef.value);
+      code = barcodes[0]?.rawValue?.trim() || "";
+    } else {
+      const width = videoRef.value.videoWidth;
+      const height = videoRef.value.videoHeight;
+      const context = ensureFallbackCanvas(width, height);
+
+      if (!context || !width || !height) {
+        scheduleScan();
+        return;
+      }
+
+      context.drawImage(videoRef.value, 0, 0, width, height);
+      const imageData = context.getImageData(0, 0, width, height);
+      const result = jsQR(imageData.data, imageData.width, imageData.height);
+      code = result?.data?.trim() || "";
+    }
 
     if (code) {
       scanLocked = true;
@@ -264,7 +307,6 @@ async function handleCheckIn(code) {
     const payload = await guestStore.checkInGuest(code);
     lastResult.value = payload;
     showResult.value = true;
-    startResultCountdown();
     statusMessage.value = "Guest check-in completed successfully.";
   } catch (error) {
     await resumeScanner();
@@ -290,6 +332,8 @@ onMounted(() => {
 
 onUnmounted(() => {
   clearResultTimers();
+  fallbackContext = null;
+  fallbackCanvas = null;
   stopCamera();
 });
 </script>
@@ -441,15 +485,20 @@ onUnmounted(() => {
   display: flex;
   inset: 0;
   justify-content: center;
-  padding: 1.5rem;
+  min-height: 100dvh;
+  padding: 0;
   position: fixed;
   z-index: 1200;
 }
 
 .success-popup-card {
-  max-width: 480px;
-  width: 100%;
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  max-width: none;
+  min-height: 100dvh;
   padding: 2.5rem 1.5rem;
+  width: 100%;
   position: relative;
   overflow: hidden;
   text-align: center;
@@ -486,7 +535,9 @@ onUnmounted(() => {
 }
 
 .success-popup-content {
+  max-width: 100vw;
   position: relative;
+  width: 100%;
   z-index: 1;
 }
 
@@ -496,7 +547,7 @@ onUnmounted(() => {
 
 .success-icon {
   font-size: 4rem;
-  color: #4cf2ff;
+  color: #fcd069;
   filter: drop-shadow(0 0 20px rgba(76, 242, 255, 0.5));
   animation: iconPop 0.6s ease-out;
 }
@@ -523,7 +574,7 @@ onUnmounted(() => {
 }
 
 .success-subtitle {
-  color: rgba(76, 242, 255, 0.9);
+  color: #f0f0ec;
   font-size: 1rem;
   margin-bottom: 1.5rem;
 }
@@ -541,7 +592,7 @@ onUnmounted(() => {
   height: 60px;
   border-radius: 50%;
   background: linear-gradient(135deg, rgba(255, 74, 99, 0.24), rgba(57, 214, 255, 0.28));
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
@@ -550,26 +601,45 @@ onUnmounted(() => {
 }
 
 .guest-details {
-  text-align: left;
+  text-align: center;
 }
 
 .guest-name {
-  color: var(--luxury-white);
+  color: #fcd069;
   font-weight: 600;
+  font-size: 3rem;
+  font-family: "Cinzel", "Times New Roman", serif;
 }
 
 .guest-company {
-  color: rgba(246, 247, 251, 0.68);
-  font-size: 0.875rem;
+  color: #fcd069;
+  font-size: 2.2rem;
+  font-weight: 600;
 }
 
 .guest-seat {
-  color: rgba(76, 242, 255, 0.92);
-  font-size: 0.8rem;
-  font-weight: 600;
-  margin-top: 0.35rem;
-  letter-spacing: 0.04em;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  margin-top: 1.2rem;
+}
+
+.guest-seat-label {
+  color: #f0f0ec;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
+}
+
+.guest-seat-value {
+  color: #f0f0ec;
+  font-size: 12rem;
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  margin-top: -0.75rem;
+  text-shadow: 0 0 18px rgba(76, 242, 255, 0.28);
 }
 
 .success-actions {
@@ -608,7 +678,6 @@ onUnmounted(() => {
   .scanner-page {
     justify-content: center;
     padding-block: 1.5rem;
-    transform: translateY(-10vh);
   }
 
   .scanner-header {

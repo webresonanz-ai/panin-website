@@ -10,9 +10,9 @@ const app = createApp(App);
 app.use(pinia);
 app.use(router);
 
-document.addEventListener("contextmenu", function (e) {
-  e.preventDefault();
-});
+// document.addEventListener("contextmenu", function (e) {
+//   e.preventDefault();
+// });
 
 const authStore = useAuthStore(pinia);
 
